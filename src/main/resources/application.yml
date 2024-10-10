@@ -1,0 +1,43 @@
+spring:
+  application:
+    name: WorkspaceService
+  datasource:
+    url: jdbc:postgresql://localhost:5432/stack_note
+    username: postgres
+    password: 2003
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+#Resource server configuration
+  security:
+    oauth2:
+      resource-server:
+        jwt:
+          issuer-uri: http://localhost:8080/realms/user
+          jwk-set-uri: ${spring.security.oauth2.resource-server.jwt.issuer-uri}/protocol/openid-connect/certs
+
+# Keycloak configuration
+keycloak:
+  auth-server-url: http://localhost:8080
+  realm: user
+  credentials:
+    client-id: user-client
+    secret: h1nkhFShjI2zQVS8UOKcILGZbziY4RSF
+    provider: secret
+
+# Swagger configuration
+springdoc:
+  swagger-ui:
+    oauth:
+      realm: user
+      client-id: user-client
+      client-secret: h1nkhFShjI2zQVS8UOKcILGZbziY4RSF
+    tags-sorter: alpha
+
+logging:
+  level:
+    org.springframework.web: debug
+server:
+  port: 8084
