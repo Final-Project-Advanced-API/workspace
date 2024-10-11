@@ -1,5 +1,4 @@
-package org.example.workspaceservice.model.response;
-
+package org.example.workspaceservice.model.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -8,14 +7,11 @@ import lombok.Setter;
 
 import java.util.UUID;
 
-@Setter
 @Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserWorkspaceResponse {
-    private UUID userRoleId;
+public class RemoveUserRequest {
     private UUID userId;
     private UUID workspaceId;
-    private Boolean isAccept;
-    private Boolean isAdmin;
 }

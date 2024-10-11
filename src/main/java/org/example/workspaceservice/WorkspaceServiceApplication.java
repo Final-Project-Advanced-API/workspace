@@ -6,20 +6,19 @@ import io.swagger.v3.oas.annotations.security.OAuthFlows;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.openfeign.EnableFeignClients;
 
 @SpringBootApplication
 @SecurityScheme(
         name = "myauth",
         type = SecuritySchemeType.OAUTH2,
         flows = @OAuthFlows(
-                clientCredentials = @OAuthFlow(
-                        tokenUrl = "http://localhost:8080/realms/user/protocol/openid-connect/token"
-                ),
                 password = @OAuthFlow(
-                        tokenUrl = "http://localhost:8080/realms/user/protocol/openid-connect/token"
+                        tokenUrl = "https://keycloak.manin.lol/realms/stack-note/protocol/openid-connect/token"
                 )
         )
 )
+@EnableFeignClients
 public class WorkspaceServiceApplication {
     public static void main(String[] args) {
         SpringApplication.run(WorkspaceServiceApplication.class, args);

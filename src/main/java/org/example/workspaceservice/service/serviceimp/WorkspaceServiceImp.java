@@ -1,5 +1,7 @@
 package org.example.workspaceservice.service.serviceimp;
 
+import lombok.AllArgsConstructor;
+import org.example.workspaceservice.Client.UserClient;
 import org.example.workspaceservice.exception.NotFoundException;
 import org.example.workspaceservice.model.entity.UserWorkspace;
 import org.example.workspaceservice.model.entity.Workspace;
@@ -10,6 +12,7 @@ import org.example.workspaceservice.repository.UserWorkspaceRepository;
 import org.example.workspaceservice.repository.WorkspaceRepository;
 import org.example.workspaceservice.service.WorkspaceService;
 import org.modelmapper.ModelMapper;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -18,15 +21,15 @@ import java.util.stream.Collectors;
 
 
 @Service
+@AllArgsConstructor
 public class WorkspaceServiceImp implements WorkspaceService {
     private final WorkspaceRepository workspaceRepository;
     private final UserWorkspaceRepository userWorkspaceRepository;
     private final ModelMapper modelMapper;
+    private final UserClient userClient;
 
-    public WorkspaceServiceImp(WorkspaceRepository workspaceRepository, UserWorkspaceRepository userWorkspaceRepository, ModelMapper modelMapper) {
-        this.workspaceRepository = workspaceRepository;
-        this.modelMapper = modelMapper;
-        this.userWorkspaceRepository = userWorkspaceRepository;
+    public String getCurrentUser(){
+        return SecurityContextHolder.getContext().getAuthentication().getName();
     }
 
     @Override
@@ -36,14 +39,16 @@ public class WorkspaceServiceImp implements WorkspaceService {
         workspace.setUpdatedAt(LocalDateTime.now());
         workspace = workspaceRepository.save(workspace);
         UserWorkspace userWorkspace = modelMapper.map(workspace, UserWorkspace.class);
-        userWorkspace.setUserId(workspace.getWorkspaceId());
+        userWorkspace.setUserId(UUID.fromString(getCurrentUser()));
         userWorkspace.setIsAdmin(true);
+        userWorkspace.setIsAccept(true);
         userWorkspaceRepository.save(userWorkspace);
         return modelMapper.map(workspace, WorkspaceResponse.class);
     }
 
     @Override
     public List<WorkspaceResponse> getAllWorkspace() {
+
         List<Workspace> workspaces = workspaceRepository.findAll();
         List<WorkspaceResponse> workspaceResponses = new ArrayList<>();
         for (Workspace workspace : workspaces) {
@@ -55,7 +60,6 @@ public class WorkspaceServiceImp implements WorkspaceService {
             workspaceResponse.setUsers(userWorkspaceResponses);
             workspaceResponses.add(workspaceResponse);
         }
-
         return workspaceResponses;
     }
 
@@ -83,4 +87,6 @@ public class WorkspaceServiceImp implements WorkspaceService {
         Workspace workspace = workspaceRepository.findById(workspaceId).orElseThrow(() -> new NotFoundException("Workspace id "+ workspaceId +" not found"));
         return modelMapper.map(workspace, WorkspaceResponse.class);
     }
+
+
 }

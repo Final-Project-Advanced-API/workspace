@@ -16,4 +16,5 @@ public interface WorkspaceService {
     Void deleteWorkspace(UUID workspaceId);
 
     WorkspaceResponse getWorkspace(UUID workspaceId);
+
 }

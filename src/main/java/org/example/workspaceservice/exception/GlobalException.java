@@ -21,4 +21,14 @@ public class GlobalException {
                 .build();
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
+    @ExceptionHandler(ConflictException.class)
+    public ResponseEntity<ExceptionResponse> conflictException(ConflictException conflictException) {
+        ExceptionResponse response= ExceptionResponse.builder()
+                .errorMessage(conflictException.getMessage())
+                .errorStatus(HttpStatus.CONFLICT)
+                .errorStatusCode(HttpStatus.CONFLICT.value())
+                .timestamp(LocalDateTime.now())
+                .build();
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+    }
 }

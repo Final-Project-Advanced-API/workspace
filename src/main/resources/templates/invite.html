@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta http-equiv="X-UA-Compatible" content="ie=edge"/>
+    <title>Accept or Reject Invitation</title>
+</head>
+<body>
+<a th:href="@{http://localhost:8084/api/v1/userworkspace/accept/(email=${toEmail},workspaceId=${workspaceId},isAccept=${isAccept})}">Accept</a>
+<p style="font-size:0.75em">
+    Welcome to the Stack note Wep Application. Here, you can
+    join workspace effectively.
+</p>
+
+</body>
+</html>

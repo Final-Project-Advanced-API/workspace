@@ -21,5 +21,7 @@ public class UserWorkspace {
     private UUID userId;
     @Column(nullable = false)
     private UUID workspaceId;
+    private Boolean isAccept;
     private Boolean isAdmin;
+
 }

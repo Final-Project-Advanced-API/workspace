@@ -1,40 +1,54 @@
 spring:
   application:
     name: WorkspaceService
+  # integrate with postgres
   datasource:
     url: jdbc:postgresql://localhost:5432/stack_note
     username: postgres
     password: 2003
+  # spring data jpa
   jpa:
     hibernate:
       ddl-auto: update
     show-sql: true
+  #config mail sender
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: bugzapper.hrd@gmail.com
+    password: dbblamycivtocqki
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
+      mail.smtp.starttls.required: true
+      mail.debug: true
 
 #Resource server configuration
   security:
     oauth2:
       resource-server:
         jwt:
-          issuer-uri: http://localhost:8080/realms/user
+          issuer-uri: https://keycloak.manin.lol/realms/stack-note
           jwk-set-uri: ${spring.security.oauth2.resource-server.jwt.issuer-uri}/protocol/openid-connect/certs
 
 # Keycloak configuration
 keycloak:
-  auth-server-url: http://localhost:8080
-  realm: user
+  auth-server-url: https://keycloak.manin.lol/
+  realm: stack-note
   credentials:
-    client-id: user-client
-    secret: h1nkhFShjI2zQVS8UOKcILGZbziY4RSF
+    client-id: stack-note-client
+    secret: bRG4XwimHwS8q5kKpyJR2IuXeunW4axw
     provider: secret
 
 # Swagger configuration
 springdoc:
   swagger-ui:
     oauth:
-      realm: user
-      client-id: user-client
-      client-secret: h1nkhFShjI2zQVS8UOKcILGZbziY4RSF
+      realm: stack-note
+      client-id: stack-note-client
+      client-secret: bRG4XwimHwS8q5kKpyJR2IuXeunW4axw
     tags-sorter: alpha
+
 
 logging:
   level:
