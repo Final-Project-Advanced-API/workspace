@@ -7,8 +7,8 @@
     <title>Accept</title>
 </head>
 <body>
-<a th:href="@{http://localhost:8084/api/v1/userworkspace/accept/(email=${toEmail},workspaceId=${workspaceId},isAccept=${isAccept})}">Reject</a>
-<a th:href="@{http://localhost:8084/api/v1/userworkspace/accept/(email=${toEmail},workspaceId=${workspaceId},isAccept=${isAccept})}">Accept</a>
+<!--<a th:href="@{http://localhost:8084/api/v1/userworkspace/accept(email=${toEmail},workspaceId=${workspaceId},isAccept=${isAccept})}">Reject</a>-->
+<a th:href="@{http://localhost:8084/api/v1/userworkspace/accept(userId=${userId},workspaceId=${workspaceId},isAccept=${isAccept})}">Accept</a>
 <p style="font-size:0.75em">
     Welcome to the Stack note Web Application. Here, you can
     join workspace effectively.

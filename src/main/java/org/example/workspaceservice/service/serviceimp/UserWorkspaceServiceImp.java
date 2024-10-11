@@ -40,9 +40,8 @@ public class UserWorkspaceServiceImp implements UserWorkspaceService {
         return SecurityContextHolder.getContext().getAuthentication().getName();
     }
 
-    @SneakyThrows
     @Override
-    public UserWorkspace inviteCollaboratorIntoWorkspace(UserWorkspaceRequest userWorkspaceRequest) {
+    public UserWorkspace inviteCollaboratorIntoWorkspace(UserWorkspaceRequest userWorkspaceRequest) throws MessagingException {
         ApiResponse<UserResponse> user = userClient.getUserByEmail(userWorkspaceRequest.getEmail());
         if (user==null){
             throw new NotFoundException("User email not found");
@@ -52,7 +51,7 @@ public class UserWorkspaceServiceImp implements UserWorkspaceService {
             throw new ConflictException("User email already join exists");
         }
         workspaceRepository.findById(userWorkspaceRequest.getWorkspaceId()).orElseThrow(() -> new NotFoundException("Workspace id " + userWorkspaceRequest.getWorkspaceId() + " not found"));
-        mailSenderService.sendMail(user.getPayload().getEmail(), userWorkspaceRequest.getWorkspaceId().toString(),false ); // Pass from email as string
+        mailSenderService.sendMail(user.getPayload().getEmail(),user.getPayload().getUserId(), userWorkspaceRequest.getWorkspaceId().toString(),true ); // Pass from email as string
         UserWorkspace userWorkspace = new UserWorkspace();
         userWorkspace.setUserId(user.getPayload().getUserId());
         userWorkspace.setWorkspaceId(userWorkspaceRequest.getWorkspaceId());
@@ -62,17 +61,14 @@ public class UserWorkspaceServiceImp implements UserWorkspaceService {
         return userWorkspace;
     }
     @Override
-    public UserWorkspace acceptToJoinWorkspace(String email, UUID workspaceId, Boolean isAccept) {
-        ApiResponse<UserResponse> user = userClient.getUserByEmail(email);
-        if (user.getPayload().getEmail().isEmpty()) {
-            throw new NotFoundException("User email "+email+" not found");
-        }
-        Optional<UserWorkspace> userWorkspace = userWorkspaceRepository.findByUserIdAndWorkspaceId(user.getPayload().getUserId(), workspaceId);
+    public void acceptToJoinWorkspace(String userId, UUID workspaceId, Boolean isAccept) {
+
+        Optional<UserWorkspace> userWorkspace = userWorkspaceRepository.findByUserIdAndWorkspaceId(UUID.fromString(userId), workspaceId);
         if (userWorkspace.isPresent()) {
+            System.out.println(isAccept);
             userWorkspace.get().setIsAccept(isAccept);
             userWorkspaceRepository.save(userWorkspace.get());
         }
-        return userWorkspace.orElse(null);
     }
 
     @Transactional

@@ -18,10 +18,11 @@ spring:
     username: bugzapper.hrd@gmail.com
     password: dbblamycivtocqki
     properties:
-      mail.smtp.auth: true
-      mail.smtp.starttls.enable: true
-      mail.smtp.starttls.required: true
-      mail.debug: true
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
 
 #Resource server configuration
   security:

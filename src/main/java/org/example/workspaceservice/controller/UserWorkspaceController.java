@@ -3,6 +3,7 @@ package org.example.workspaceservice.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import jakarta.mail.MessagingException;
 import lombok.AllArgsConstructor;
 import org.example.workspaceservice.model.request.RemoveUserRequest;
 import org.example.workspaceservice.model.request.UserWorkspaceRequest;
@@ -24,7 +25,7 @@ public class UserWorkspaceController {
 
     @PostMapping
     @Operation(summary = "invite collaborator into workspace")
-    public ResponseEntity<?> inviteCollaboratorIntoWorkspace(@RequestBody UserWorkspaceRequest userWorkspaceRequest) {
+    public ResponseEntity<?> inviteCollaboratorIntoWorkspace(@RequestBody UserWorkspaceRequest userWorkspaceRequest) throws MessagingException {
         ApiResponse<?> response = ApiResponse.builder()
                 .message("Invite collaborator into workspace successfully")
                 .payload(userWorkspaceService.inviteCollaboratorIntoWorkspace(userWorkspaceRequest))
@@ -48,19 +49,16 @@ public class UserWorkspaceController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PostMapping("/accept")
+    @GetMapping("/accept")
     @Operation(summary = "accept to join workspace")
-    public ResponseEntity<?> acceptToJoinWorkspace(@RequestParam String email, @RequestParam UUID workspaceId, @RequestParam Boolean isAccept) {
-        userWorkspaceService.acceptToJoinWorkspace(email, workspaceId, isAccept);
-        String redirectUrl;
+    public ResponseEntity<?> acceptToJoinWorkspace(@RequestParam  String userId, @RequestParam UUID workspaceId, @RequestParam Boolean isAccept) throws MessagingException {
+        userWorkspaceService.acceptToJoinWorkspace(userId, workspaceId, isAccept);
+        String redirectUrl = null;
         if (isAccept) {
             redirectUrl = "http://localhost:3000/login";
-        } else {
-            redirectUrl = "http://localhost:3000/resetpassword?email=" + email;
         }
         return ResponseEntity.status(HttpStatus.FOUND)
                 .header("Location", redirectUrl)
                 .build();
-
     }
 }
