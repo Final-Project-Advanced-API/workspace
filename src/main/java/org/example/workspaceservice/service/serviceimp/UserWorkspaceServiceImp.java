@@ -24,9 +24,6 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.thymeleaf.TemplateEngine;
-
-import javax.naming.Context;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -35,7 +32,6 @@ import java.util.UUID;
 public class UserWorkspaceServiceImp implements UserWorkspaceService {
     private final WorkspaceRepository workspaceRepository;
     private final UserWorkspaceRepository userWorkspaceRepository;
-    private final ModelMapper modelMapper;
     private final UserClient userClient;
     private final MailSenderService mailSenderService;
 
@@ -48,7 +44,7 @@ public class UserWorkspaceServiceImp implements UserWorkspaceService {
     @Override
     public UserWorkspace inviteCollaboratorIntoWorkspace(UserWorkspaceRequest userWorkspaceRequest) {
         ApiResponse<UserResponse> user = userClient.getUserByEmail(userWorkspaceRequest.getEmail());
-        if (user == null) {
+        if (user==null){
             throw new NotFoundException("User email not found");
         }
         Optional<UserWorkspace> existUser = userWorkspaceRepository.findByUserIdAndWorkspaceId(user.getPayload().getUserId(), userWorkspaceRequest.getWorkspaceId());
@@ -56,7 +52,6 @@ public class UserWorkspaceServiceImp implements UserWorkspaceService {
             throw new ConflictException("User email already join exists");
         }
         workspaceRepository.findById(userWorkspaceRequest.getWorkspaceId()).orElseThrow(() -> new NotFoundException("Workspace id " + userWorkspaceRequest.getWorkspaceId() + " not found"));
-        // Create a context for the email template
         mailSenderService.sendMail(user.getPayload().getEmail(), userWorkspaceRequest.getWorkspaceId().toString(),false ); // Pass from email as string
         UserWorkspace userWorkspace = new UserWorkspace();
         userWorkspace.setUserId(user.getPayload().getUserId());
@@ -69,17 +64,15 @@ public class UserWorkspaceServiceImp implements UserWorkspaceService {
     @Override
     public UserWorkspace acceptToJoinWorkspace(String email, UUID workspaceId, Boolean isAccept) {
         ApiResponse<UserResponse> user = userClient.getUserByEmail(email);
-        if (user == null) {
-            throw new NotFoundException("User email not found");
+        if (user.getPayload().getEmail().isEmpty()) {
+            throw new NotFoundException("User email "+email+" not found");
         }
         Optional<UserWorkspace> userWorkspace = userWorkspaceRepository.findByUserIdAndWorkspaceId(user.getPayload().getUserId(), workspaceId);
         if (userWorkspace.isPresent()) {
-        userWorkspace.get().setIsAccept(true);
-        userWorkspaceRepository.save(userWorkspace.get());
-        return userWorkspace.orElse(null);
-        } else {
-            throw new NotFoundException("User id " + user.getPayload().getUserId() + " not found");
+            userWorkspace.get().setIsAccept(isAccept);
+            userWorkspaceRepository.save(userWorkspace.get());
         }
+        return userWorkspace.orElse(null);
     }
 
     @Transactional

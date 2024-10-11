@@ -30,7 +30,6 @@ public class MailSenderServiceImp implements MailSenderService {
     @Override
     public void sendMail(String toEmail, String workspaceId, Boolean isAccept) throws MessagingException {
         MimeMessage message = javaMailSender.createMimeMessage();
-        String processedString = templateEngine.process("invite", context);
         context.setVariable("toEmail", toEmail);
         context.setVariable("workspaceId", workspaceId);
         context.setVariable("isAccept",isAccept);

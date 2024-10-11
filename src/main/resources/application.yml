@@ -48,8 +48,6 @@ springdoc:
       client-id: stack-note-client
       client-secret: bRG4XwimHwS8q5kKpyJR2IuXeunW4axw
     tags-sorter: alpha
-
-
 logging:
   level:
     org.springframework.web: debug

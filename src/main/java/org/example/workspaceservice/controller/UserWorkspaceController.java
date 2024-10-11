@@ -4,12 +4,10 @@ package org.example.workspaceservice.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.AllArgsConstructor;
-import org.example.workspaceservice.model.request.AcceptRequest;
 import org.example.workspaceservice.model.request.RemoveUserRequest;
 import org.example.workspaceservice.model.request.UserWorkspaceRequest;
 import org.example.workspaceservice.model.response.ApiResponse;
 import org.example.workspaceservice.service.UserWorkspaceService;
-import org.example.workspaceservice.service.WorkspaceService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -23,10 +21,10 @@ import java.util.UUID;
 @SecurityRequirement(name = "myauth")
 public class UserWorkspaceController {
     private final UserWorkspaceService userWorkspaceService;
-    private final WorkspaceService workspaceService;
+
     @PostMapping
     @Operation(summary = "invite collaborator into workspace")
-    public ResponseEntity<?> inviteCollaboratorIntoWorkspace(@RequestBody UserWorkspaceRequest userWorkspaceRequest){
+    public ResponseEntity<?> inviteCollaboratorIntoWorkspace(@RequestBody UserWorkspaceRequest userWorkspaceRequest) {
         ApiResponse<?> response = ApiResponse.builder()
                 .message("Invite collaborator into workspace successfully")
                 .payload(userWorkspaceService.inviteCollaboratorIntoWorkspace(userWorkspaceRequest))
@@ -39,7 +37,7 @@ public class UserWorkspaceController {
 
     @DeleteMapping
     @Operation(summary = "delete collaborator from workspace")
-    public ResponseEntity<?> deleteCollaboratorFromWorkspace(@RequestBody RemoveUserRequest removeUserRequest){
+    public ResponseEntity<?> deleteCollaboratorFromWorkspace(@RequestBody RemoveUserRequest removeUserRequest) {
         ApiResponse<?> response = ApiResponse.builder()
                 .message("Delete collaborator from workspace successfully")
                 .payload(userWorkspaceService.deleteCollaboratorFromWorkspace(removeUserRequest))
@@ -52,8 +50,17 @@ public class UserWorkspaceController {
 
     @PostMapping("/accept")
     @Operation(summary = "accept to join workspace")
-    public ResponseEntity<?> acceptToJoinWorkspace(@RequestParam String email, @RequestParam UUID workspaceId,@RequestParam Boolean isAccept){
-        userWorkspaceService.acceptToJoinWorkspace(email,workspaceId,isAccept);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<?> acceptToJoinWorkspace(@RequestParam String email, @RequestParam UUID workspaceId, @RequestParam Boolean isAccept) {
+        userWorkspaceService.acceptToJoinWorkspace(email, workspaceId, isAccept);
+        String redirectUrl;
+        if (isAccept) {
+            redirectUrl = "http://localhost:3000/login";
+        } else {
+            redirectUrl = "http://localhost:3000/resetpassword?email=" + email;
+        }
+        return ResponseEntity.status(HttpStatus.FOUND)
+                .header("Location", redirectUrl)
+                .build();
+
     }
 }
