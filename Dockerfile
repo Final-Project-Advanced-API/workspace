@@ -23,7 +23,7 @@ WORKDIR $APP_HOME
 COPY --from=build $APP_HOME/build/libs/*.jar app.jar
 
 # Expose port 8081
-EXPOSE 8081
+EXPOSE 8084
 
 # Command to run the application
 ENTRYPOINT ["java", "-jar", "/usr/app/app.jar"]
