@@ -38,7 +38,7 @@ keycloak:
   realm: stack-note
   credentials:
     client-id: stack-note-client
-    secret: bRG4XwimHwS8q5kKpyJR2IuXeunW4axw
+    secret: tDbzKXKsHvvmFQAJ1bUSR87Dbia2ssfZ
     provider: secret
 
 # Swagger configuration
@@ -47,7 +47,7 @@ springdoc:
     oauth:
       realm: stack-note
       client-id: stack-note-client
-      client-secret: bRG4XwimHwS8q5kKpyJR2IuXeunW4axw
+      client-secret: tDbzKXKsHvvmFQAJ1bUSR87Dbia2ssfZ
     tags-sorter: alpha
 
 logging:
