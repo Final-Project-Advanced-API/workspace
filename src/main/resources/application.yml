@@ -1,6 +1,6 @@
 spring:
   application:
-    name: WorkspaceService
+    name: workspace-service
   # integrate with postgres
   datasource:
     url: jdbc:postgresql://localhost:5432/stack_note
@@ -29,17 +29,25 @@ spring:
     oauth2:
       resource-server:
         jwt:
-          issuer-uri: https://keycloak.manin.lol/realms/stack-note
+          issuer-uri: https://keycloak.jelay.site/realms/stack-note
           jwk-set-uri: ${spring.security.oauth2.resource-server.jwt.issuer-uri}/protocol/openid-connect/certs
 
 # Keycloak configuration
 keycloak:
-  auth-server-url: https://keycloak.manin.lol/
+  auth-server-url: https://keycloak.jelay.site/
   realm: stack-note
   credentials:
     client-id: stack-note-client
     secret: tDbzKXKsHvvmFQAJ1bUSR87Dbia2ssfZ
     provider: secret
+
+# connect with eureka server
+eureka:
+  client:
+    service-url:
+      defaultZone: http://165.22.244.160:8761/eureka/  # Adjust for your Eureka server URL
+  instance:
+    prefer-ip-address: true
 
 # Swagger configuration
 springdoc:
@@ -49,6 +57,7 @@ springdoc:
       client-id: stack-note-client
       client-secret: tDbzKXKsHvvmFQAJ1bUSR87Dbia2ssfZ
     tags-sorter: alpha
+
 
 logging:
   level:

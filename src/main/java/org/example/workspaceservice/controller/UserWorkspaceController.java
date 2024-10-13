@@ -15,9 +15,10 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1/userworkspace")
+@RequestMapping("/api/v1/userworkspaces")
 @AllArgsConstructor
-@SecurityRequirement(name = "myauth")
+@SecurityRequirement(name = "stack-notes")
+@CrossOrigin
 public class UserWorkspaceController {
     private final UserWorkspaceService userWorkspaceService;
 
