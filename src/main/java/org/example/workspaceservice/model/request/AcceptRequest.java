@@ -18,6 +18,8 @@ public class AcceptRequest {
     @Email
     @NotBlank
     @NotNull
+    @Pattern(regexp = "^[A-Za-z0-9+_.-]+@gmail\\.com$",
+            message = "Email is valid")
     private String email;
 
     @NotBlank
