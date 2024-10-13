@@ -13,7 +13,7 @@ public class UserClientFallback implements UserClient {
     public ApiResponse<UserResponse> getUserByEmail(String email) {
         return ApiResponse.<UserResponse>builder()
                 .message("INTERNAL SERVER ERROR")
-                .payload(new UserResponse(UUID.fromString("unkown"),"unknow","unknow","unknow", LocalDate.now(),"no","no",LocalDateTime.now(),LocalDateTime.now()))
+                .payload(new UserResponse(UUID.fromString("unknown"),"unknown","unknown","unknown", LocalDate.now(),"unknown","unknown",LocalDateTime.now(),LocalDateTime.now()))
                 .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .timestamp(LocalDateTime.now())

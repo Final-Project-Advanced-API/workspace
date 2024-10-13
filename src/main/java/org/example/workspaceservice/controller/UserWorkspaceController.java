@@ -3,6 +3,7 @@ package org.example.workspaceservice.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.mail.MessagingException;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.example.workspaceservice.model.request.RemoveUserRequest;
 import org.example.workspaceservice.model.request.UserWorkspaceRequest;
@@ -24,7 +25,7 @@ public class UserWorkspaceController {
 
     @PostMapping
     @Operation(summary = "invite collaborator into workspace")
-    public ResponseEntity<?> inviteCollaboratorIntoWorkspace(@RequestBody UserWorkspaceRequest userWorkspaceRequest) throws MessagingException {
+    public ResponseEntity<?> inviteCollaboratorIntoWorkspace(@RequestBody @Valid UserWorkspaceRequest userWorkspaceRequest) throws MessagingException {
         ApiResponse<?> response = ApiResponse.builder()
                 .message("Invite collaborator into workspace successfully")
                 .payload(userWorkspaceService.inviteCollaboratorIntoWorkspace(userWorkspaceRequest))
@@ -37,7 +38,7 @@ public class UserWorkspaceController {
 
     @DeleteMapping
     @Operation(summary = "delete collaborator from workspace")
-    public ResponseEntity<?> deleteCollaboratorFromWorkspace(@RequestBody RemoveUserRequest removeUserRequest) {
+    public ResponseEntity<?> deleteCollaboratorFromWorkspace(@RequestBody @Valid RemoveUserRequest removeUserRequest) {
         ApiResponse<?> response = ApiResponse.builder()
                 .message("Delete collaborator from workspace successfully")
                 .payload(userWorkspaceService.deleteCollaboratorFromWorkspace(removeUserRequest))
@@ -50,7 +51,7 @@ public class UserWorkspaceController {
 
     @GetMapping("/accept")
     @Operation(summary = "accept to join workspace")
-    public ResponseEntity<?> acceptToJoinWorkspace(@RequestParam  String userId, @RequestParam UUID workspaceId, @RequestParam Boolean isAccept) throws MessagingException {
+    public ResponseEntity<?> acceptToJoinWorkspace(@RequestParam @Valid UUID userId, @RequestParam @Valid UUID workspaceId, @RequestParam Boolean isAccept) throws MessagingException {
         userWorkspaceService.acceptToJoinWorkspace(userId, workspaceId, isAccept);
         String redirectUrl = null;
         if (isAccept) {

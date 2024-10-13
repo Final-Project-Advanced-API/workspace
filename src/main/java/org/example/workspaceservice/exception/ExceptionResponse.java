@@ -1,4 +1,4 @@
-package org.example.workspaceservice.utils;
+package org.example.workspaceservice.exception;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Builder;
 import lombok.Getter;

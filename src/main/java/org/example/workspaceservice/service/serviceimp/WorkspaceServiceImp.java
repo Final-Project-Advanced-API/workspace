@@ -48,7 +48,6 @@ public class WorkspaceServiceImp implements WorkspaceService {
 
     @Override
     public List<WorkspaceResponse> getAllWorkspace() {
-
         List<Workspace> workspaces = workspaceRepository.findAll();
         List<WorkspaceResponse> workspaceResponses = new ArrayList<>();
         for (Workspace workspace : workspaces) {
