@@ -29,15 +29,15 @@ spring:
     oauth2:
       resource-server:
         jwt:
-          issuer-uri: https://keycloak.jelay.site/realms/stack-note
+          issuer-uri: https://keycloak.jelay.site/realms/stack-notes
           jwk-set-uri: ${spring.security.oauth2.resource-server.jwt.issuer-uri}/protocol/openid-connect/certs
 
 # Keycloak configuration
 keycloak:
   auth-server-url: https://keycloak.jelay.site/
-  realm: stack-note
+  realm: stack-notes
   credentials:
-    client-id: stack-note-client
+    client-id: stack-notes-client
     secret: tDbzKXKsHvvmFQAJ1bUSR87Dbia2ssfZ
     provider: secret
 
@@ -53,8 +53,8 @@ eureka:
 springdoc:
   swagger-ui:
     oauth:
-      realm: stack-note
-      client-id: stack-note-client
+      realm: stack-notes
+      client-id: stack-notes-client
       client-secret: tDbzKXKsHvvmFQAJ1bUSR87Dbia2ssfZ
     tags-sorter: alpha
 

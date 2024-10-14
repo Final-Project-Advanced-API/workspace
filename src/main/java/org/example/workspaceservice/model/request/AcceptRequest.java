@@ -22,11 +22,7 @@ public class AcceptRequest {
             message = "Email is valid")
     private String email;
 
-    @NotBlank
-    @NotNull
     private UUID workspaceId;
 
-    @NotNull
-    @Pattern(regexp = "^(true|false)$", message = "must be 'true' or 'false'")
     private Boolean isAccept;
 }

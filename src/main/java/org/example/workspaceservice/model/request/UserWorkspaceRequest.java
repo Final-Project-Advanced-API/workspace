@@ -23,7 +23,5 @@ public class UserWorkspaceRequest {
     @Pattern(regexp = "^[A-Za-z0-9+_.-]+@gmail\\.com$",
             message = "Email is valid")
     private String email;
-    @NotNull
-    @NotBlank
     private UUID workspaceId;
 }

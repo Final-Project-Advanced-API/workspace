@@ -17,8 +17,5 @@ public class WorkspaceRequest {
     @NotNull
     @NotBlank
     private String workspaceName;
-
-    @NotNull
-    @Pattern(regexp = "^(true|false)$", message = "must be 'true' or 'false'")
     private Boolean isPrivate;
 }

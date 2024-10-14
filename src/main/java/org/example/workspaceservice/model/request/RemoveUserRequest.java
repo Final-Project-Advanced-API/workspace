@@ -14,10 +14,6 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 public class RemoveUserRequest {
-    @NotNull
-    @NotBlank
     private UUID userId;
-    @NotNull
-    @NotBlank
     private UUID workspaceId;
 }

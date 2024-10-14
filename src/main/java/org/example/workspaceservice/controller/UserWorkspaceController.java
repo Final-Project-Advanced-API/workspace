@@ -37,11 +37,11 @@ public class UserWorkspaceController {
     }
 
     @DeleteMapping
-    @Operation(summary = "delete collaborator from workspace")
-    public ResponseEntity<?> deleteCollaboratorFromWorkspace(@RequestBody @Valid RemoveUserRequest removeUserRequest) {
+    @Operation(summary = "remove collaborator from workspace")
+    public ResponseEntity<?> removeCollaboratorFromWorkspace(@RequestBody @Valid RemoveUserRequest removeUserRequest) {
         ApiResponse<?> response = ApiResponse.builder()
                 .message("Delete collaborator from workspace successfully")
-                .payload(userWorkspaceService.deleteCollaboratorFromWorkspace(removeUserRequest))
+                .payload(userWorkspaceService.removeCollaboratorFromWorkspace(removeUserRequest))
                 .status(HttpStatus.OK)
                 .statusCode(HttpStatus.OK.value())
                 .timestamp(LocalDateTime.now())
@@ -55,10 +55,13 @@ public class UserWorkspaceController {
         userWorkspaceService.acceptToJoinWorkspace(userId, workspaceId, isAccept);
         String redirectUrl = null;
         if (isAccept) {
-            redirectUrl = "http://localhost:3000/login";
+            redirectUrl = "https://chatgpt.com";
+        }else {
+            redirectUrl = "https://gemini.google.com";
         }
         return ResponseEntity.status(HttpStatus.FOUND)
                 .header("Location", redirectUrl)
                 .build();
     }
+
 }

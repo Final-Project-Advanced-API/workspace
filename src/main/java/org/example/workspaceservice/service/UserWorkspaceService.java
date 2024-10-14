@@ -12,6 +12,6 @@ import java.util.UUID;
 
 public interface UserWorkspaceService {
     UserWorkspace inviteCollaboratorIntoWorkspace(UserWorkspaceRequest userWorkspaceRequest) throws MessagingException;
-    Void deleteCollaboratorFromWorkspace(RemoveUserRequest removeUserRequest);
+    Void removeCollaboratorFromWorkspace(RemoveUserRequest removeUserRequest);
     void acceptToJoinWorkspace(UUID userId,UUID workspaceId, Boolean isAccept) throws MessagingException;
 }

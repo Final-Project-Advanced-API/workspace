@@ -18,7 +18,7 @@ public class KeycloakSecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http.cors(Customizer.withDefaults()).csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> {
-                    auth.requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html","/api/v1/userworkspace/accept").permitAll();
+                    auth.requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html","/api/v1/userworkspaces/accept").permitAll();
                     auth.anyRequest().authenticated();
                 })
                 .sessionManagement(session -> session

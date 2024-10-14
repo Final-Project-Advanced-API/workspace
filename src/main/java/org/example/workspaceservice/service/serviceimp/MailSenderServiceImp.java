@@ -16,7 +16,6 @@ import java.util.UUID;
 public class MailSenderServiceImp implements MailSenderService {
     private final JavaMailSender javaMailSender;
     private final TemplateEngine templateEngine;
-//    private final Context context;
 
     @Override
     public void sendMail(String toEmail,UUID userId, String workspaceId, Boolean isAccept) throws MessagingException {

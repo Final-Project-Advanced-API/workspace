@@ -8,6 +8,7 @@ import lombok.SneakyThrows;
 import org.example.workspaceservice.Client.UserClient;
 import org.example.workspaceservice.exception.BadRequestException;
 import org.example.workspaceservice.exception.ConflictException;
+import org.example.workspaceservice.exception.ForbiddenException;
 import org.example.workspaceservice.exception.NotFoundException;
 import org.example.workspaceservice.model.entity.UserWorkspace;
 import org.example.workspaceservice.model.request.AcceptRequest;
@@ -22,6 +23,7 @@ import org.example.workspaceservice.service.UserWorkspaceService;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.util.Optional;
 import java.util.UUID;
 
@@ -39,23 +41,26 @@ public class UserWorkspaceServiceImp implements UserWorkspaceService {
 
     @Override
     public UserWorkspace inviteCollaboratorIntoWorkspace(UserWorkspaceRequest userWorkspaceRequest) throws MessagingException {
+        Optional<UserWorkspace> admin = userWorkspaceRepository.findByUserIdAndWorkspaceId(UUID.fromString(getCurrentUser()), userWorkspaceRequest.getWorkspaceId());
+        if (admin.isPresent()) {
+            if (!admin.get().getIsAdmin()) {
+                throw new ForbiddenException("Not allowed to invite a collaborator");
+            }
+        } else {
+            throw new NotFoundException("User workspace not found");
+        }
         ApiResponse<UserResponse> user;
         try {
             user = userClient.getUserByEmail(userWorkspaceRequest.getEmail());
         } catch (FeignException.NotFound e) {
             throw new NotFoundException("User with email " + userWorkspaceRequest.getEmail() + " not found");
-        } catch (FeignException e) {
-            throw new BadRequestException("Error occurred while retrieving user information: " + e.getMessage());
-        } catch (Exception e) {
-            throw new BadRequestException("Unexpected error occurred: " + e.getMessage());
         }
-
         Optional<UserWorkspace> existUser = userWorkspaceRepository.findByUserIdAndWorkspaceId(user.getPayload().getUserId(), userWorkspaceRequest.getWorkspaceId());
         if (existUser.isPresent()) {
-            throw new ConflictException("User email already join exists");
+            throw new ConflictException("User email already join this workspace");
         }
         workspaceRepository.findById(userWorkspaceRequest.getWorkspaceId()).orElseThrow(() -> new NotFoundException("Workspace id " + userWorkspaceRequest.getWorkspaceId() + " not found"));
-        mailSenderService.sendMail(user.getPayload().getEmail(),user.getPayload().getUserId(), userWorkspaceRequest.getWorkspaceId().toString(),true ); // Pass from email as string
+        mailSenderService.sendMail(user.getPayload().getEmail(), user.getPayload().getUserId(), userWorkspaceRequest.getWorkspaceId().toString(), false); // Pass from email as string
         UserWorkspace userWorkspace = new UserWorkspace();
         userWorkspace.setUserId(user.getPayload().getUserId());
         userWorkspace.setWorkspaceId(userWorkspaceRequest.getWorkspaceId());
@@ -64,20 +69,29 @@ public class UserWorkspaceServiceImp implements UserWorkspaceService {
         userWorkspaceRepository.save(userWorkspace);
         return userWorkspace;
     }
+
     @Override
     public void acceptToJoinWorkspace(UUID userId, UUID workspaceId, Boolean isAccept) {
         Optional<UserWorkspace> userWorkspace = userWorkspaceRepository.findByUserIdAndWorkspaceId(userId, workspaceId);
         if (userWorkspace.isPresent()) {
             userWorkspace.get().setIsAccept(isAccept);
             userWorkspaceRepository.save(userWorkspace.get());
+        } else {
+            throw new NotFoundException("User workspace not found");
         }
     }
 
     @Transactional
     @Override
-    public Void deleteCollaboratorFromWorkspace(RemoveUserRequest removeUserRequest) {
-        userWorkspaceRepository.findByUserId(removeUserRequest.getUserId()).orElseThrow(() -> new NotFoundException("User id " + removeUserRequest.getWorkspaceId() + " not found"));
-        workspaceRepository.findById(removeUserRequest.getWorkspaceId()).orElseThrow(() -> new NotFoundException("Workspace id " + removeUserRequest.getWorkspaceId() + " not found"));
+    public Void removeCollaboratorFromWorkspace(RemoveUserRequest removeUserRequest) {
+        Optional<UserWorkspace> admin = userWorkspaceRepository.findByUserIdAndWorkspaceId(UUID.fromString(getCurrentUser()), removeUserRequest.getWorkspaceId());
+        if (admin.isPresent()) {
+            if (!admin.get().getIsAdmin()) {
+                throw new ForbiddenException("Not allowed to remove a collaborator");
+            }
+        } else {
+            throw new NotFoundException("User workspace not found");
+        }
         userWorkspaceRepository.deleteByUserIdAndWorkspaceId(removeUserRequest.getUserId(), removeUserRequest.getWorkspaceId());
         return null;
     }

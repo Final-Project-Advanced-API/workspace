@@ -2,6 +2,7 @@ package org.example.workspaceservice.service.serviceimp;
 
 import lombok.AllArgsConstructor;
 import org.example.workspaceservice.Client.UserClient;
+import org.example.workspaceservice.exception.ForbiddenException;
 import org.example.workspaceservice.exception.NotFoundException;
 import org.example.workspaceservice.model.entity.UserWorkspace;
 import org.example.workspaceservice.model.entity.Workspace;
@@ -26,7 +27,6 @@ public class WorkspaceServiceImp implements WorkspaceService {
     private final WorkspaceRepository workspaceRepository;
     private final UserWorkspaceRepository userWorkspaceRepository;
     private final ModelMapper modelMapper;
-    private final UserClient userClient;
 
     public String getCurrentUser(){
         return SecurityContextHolder.getContext().getAuthentication().getName();
@@ -66,6 +66,12 @@ public class WorkspaceServiceImp implements WorkspaceService {
     @Override
     public WorkspaceResponse updateWorkspace(UUID workspaceId, WorkspaceRequest workspaceRequest) {
         Workspace workspace = workspaceRepository.findById(workspaceId).orElseThrow(() -> new NotFoundException("Workspace id "+ workspaceId +" not found"));
+        Optional<UserWorkspace> userWorkspace = userWorkspaceRepository.findByUserIdAndWorkspaceId(UUID.fromString(getCurrentUser()),workspaceId);
+        if(userWorkspace.isPresent()){
+            if(!userWorkspace.get().getIsAdmin()){
+                throw new ForbiddenException("Not allowed to update workspace");
+            }
+        }
         modelMapper.map(workspaceRequest, workspace);
         workspace.setUpdatedAt(LocalDateTime.now());
         workspace = workspaceRepository.save(workspace);
@@ -75,6 +81,12 @@ public class WorkspaceServiceImp implements WorkspaceService {
     @Override
     public Void deleteWorkspace(UUID workspaceId) {
         Workspace workspace = workspaceRepository.findById(workspaceId).orElseThrow(() -> new NotFoundException("Workspace id "+ workspaceId +" not found"));
+        Optional<UserWorkspace> userWorkspace = userWorkspaceRepository.findByUserIdAndWorkspaceId(UUID.fromString(getCurrentUser()),workspaceId);
+        if(userWorkspace.isPresent()){
+            if(!userWorkspace.get().getIsAdmin()){
+                throw new ForbiddenException("Not allowed to delete workspace");
+            }
+        }
         List<UserWorkspace> userWorkspaces = userWorkspaceRepository.findByWorkspaceId(workspace.getWorkspaceId());
         workspaceRepository.delete(workspace);
         userWorkspaceRepository.deleteAll(userWorkspaces);
