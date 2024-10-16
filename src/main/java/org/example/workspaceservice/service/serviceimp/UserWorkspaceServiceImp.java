@@ -2,6 +2,7 @@ package org.example.workspaceservice.service.serviceimp;
 
 import feign.FeignException;
 import jakarta.mail.MessagingException;
+import jakarta.mail.SendFailedException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
@@ -35,10 +36,10 @@ public class UserWorkspaceServiceImp implements UserWorkspaceService {
     private final UserClient userClient;
     private final MailSenderService mailSenderService;
 
+
     public String getCurrentUser() {
         return SecurityContextHolder.getContext().getAuthentication().getName();
     }
-
     @Override
     public UserWorkspace inviteCollaboratorIntoWorkspace(UserWorkspaceRequest userWorkspaceRequest) throws MessagingException {
         Optional<UserWorkspace> admin = userWorkspaceRepository.findByUserIdAndWorkspaceId(UUID.fromString(getCurrentUser()), userWorkspaceRequest.getWorkspaceId());
@@ -55,12 +56,8 @@ public class UserWorkspaceServiceImp implements UserWorkspaceService {
         } catch (FeignException.NotFound e) {
             throw new NotFoundException("User with email " + userWorkspaceRequest.getEmail() + " not found");
         }
-        Optional<UserWorkspace> existUser = userWorkspaceRepository.findByUserIdAndWorkspaceId(user.getPayload().getUserId(), userWorkspaceRequest.getWorkspaceId());
-        if (existUser.isPresent()) {
-            throw new ConflictException("User email already join this workspace");
-        }
         workspaceRepository.findById(userWorkspaceRequest.getWorkspaceId()).orElseThrow(() -> new NotFoundException("Workspace id " + userWorkspaceRequest.getWorkspaceId() + " not found"));
-        mailSenderService.sendMail(user.getPayload().getEmail(), user.getPayload().getUserId(), userWorkspaceRequest.getWorkspaceId().toString(), false); // Pass from email as string
+        mailSenderService.sendMail(user.getPayload().getEmail(), user.getPayload().getUserId(), userWorkspaceRequest.getWorkspaceId().toString(), false);
         UserWorkspace userWorkspace = new UserWorkspace();
         userWorkspace.setUserId(user.getPayload().getUserId());
         userWorkspace.setWorkspaceId(userWorkspaceRequest.getWorkspaceId());

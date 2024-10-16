@@ -20,6 +20,8 @@ public class WorkspaceResponse {
     private Boolean isPrivate;
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private List<UserWorkspaceResponse> users;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private List<DocumentResponse> documents;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

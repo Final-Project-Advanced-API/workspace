@@ -53,7 +53,7 @@ public class UserWorkspaceController {
     @Operation(summary = "accept to join workspace")
     public ResponseEntity<?> acceptToJoinWorkspace(@RequestParam @Valid UUID userId, @RequestParam @Valid UUID workspaceId, @RequestParam Boolean isAccept) throws MessagingException {
         userWorkspaceService.acceptToJoinWorkspace(userId, workspaceId, isAccept);
-        String redirectUrl = null;
+        String redirectUrl;
         if (isAccept) {
             redirectUrl = "https://chatgpt.com";
         }else {

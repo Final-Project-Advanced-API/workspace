@@ -35,5 +35,4 @@ public class BeanConfig {
     public Context context(){
         return new Context();
     }
-
 }
