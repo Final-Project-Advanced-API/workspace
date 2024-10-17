@@ -17,6 +17,7 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
                 description = "Stack-Notes Api"
 
         )
+
 )
 @SecurityScheme(
         name = "stack-notes",

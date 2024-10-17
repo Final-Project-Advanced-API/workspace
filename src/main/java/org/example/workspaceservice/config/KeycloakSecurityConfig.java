@@ -15,7 +15,6 @@ import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 @AllArgsConstructor
 public class KeycloakSecurityConfig {
     private final CustomAccessDeniedHandler customAccessDeniedHandler;
-
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http.cors(Customizer.withDefaults()).csrf(AbstractHttpConfigurer::disable)

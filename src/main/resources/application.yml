@@ -13,6 +13,15 @@ spring:
       ddl-auto: update
     show-sql: true
 
+#  cloud:
+#    openfeign:
+#      circuitbreaker:
+#        enabled: true
+#      compression:
+#        response:
+#          enabled: true
+#        request:
+#          enabled: true
 
   #config mail sender
   mail:
@@ -52,6 +61,7 @@ eureka:
   instance:
     prefer-ip-address: true
 
+
 # Swagger configuration
 springdoc:
   swagger-ui:
@@ -63,6 +73,6 @@ springdoc:
 
 logging:
   level:
-    org.example.workspaceservice.WorkspaceServiceApplication : error
+    org.example : debug
 server:
   port: 8084

@@ -8,6 +8,5 @@ import java.util.UUID;
 public class DocumentClientFallback implements DocumentClient {
     @Override
     public void deleteDocumentByWorkspaceId(UUID workspaceId) {
-
     }
 }
