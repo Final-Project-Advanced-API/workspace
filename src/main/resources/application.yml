@@ -6,6 +6,7 @@ spring:
     url: jdbc:postgresql://localhost:5432/stack_note
     username: postgres
     password: 2003
+
   # spring data jpa
   jpa:
     hibernate:
