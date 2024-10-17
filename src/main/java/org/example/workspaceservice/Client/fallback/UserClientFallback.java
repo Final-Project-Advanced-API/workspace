@@ -23,15 +23,11 @@ public class UserClientFallback implements UserClient {
                 .build();
     }
 
+
+
     @Override
     public ApiResponse<UserResponse> getUserById(UUID userId) {
-        return ApiResponse.<UserResponse>builder()
-                .message("User service is currently unavailable. Returning fallback data.")
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)// 503 Service Unavailable
-                .statusCode(HttpStatus.SERVICE_UNAVAILABLE.value())
-                .payload(getUnknownUserResponse()) // Provide fallback UserResponse
-                .timestamp(LocalDateTime.now())
-                .build();
+        return null;
     }
 
     private UserResponse getUnknownUserResponse() {

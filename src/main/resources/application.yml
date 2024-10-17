@@ -7,21 +7,16 @@ spring:
     username: postgres
     password: 2003
 
+#  cloud:
+#    openfeign:
+#      circuitbreaker:
+#        enabled: true
+
   # spring data jpa
   jpa:
     hibernate:
       ddl-auto: update
     show-sql: true
-
-#  cloud:
-#    openfeign:
-#      circuitbreaker:
-#        enabled: true
-#      compression:
-#        response:
-#          enabled: true
-#        request:
-#          enabled: true
 
   #config mail sender
   mail:
@@ -61,7 +56,6 @@ eureka:
   instance:
     prefer-ip-address: true
 
-
 # Swagger configuration
 springdoc:
   swagger-ui:
@@ -71,8 +65,16 @@ springdoc:
       client-secret: tDbzKXKsHvvmFQAJ1bUSR87Dbia2ssfZ
     tags-sorter: alpha
 
+#resilience4j:
+#  circuitbreaker:
+#    instances:
+#      userid:
+#        failureRateThreshold: 50
+#        waitDurationInOpenState: 10000
+#        slidingWindowSize: 10
+#        minimumNumberOfCalls: 5
 logging:
   level:
-    org.example : debug
+    org.example: debug
 server:
   port: 8084
