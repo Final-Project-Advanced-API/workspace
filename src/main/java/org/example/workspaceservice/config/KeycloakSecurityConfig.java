@@ -1,4 +1,5 @@
 package org.example.workspaceservice.config;
+
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,11 +15,12 @@ import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 @AllArgsConstructor
 public class KeycloakSecurityConfig {
     private final CustomAccessDeniedHandler customAccessDeniedHandler;
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http.cors(Customizer.withDefaults()).csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> {
-                    auth.requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html","/api/v1/userworkspaces/accept").permitAll();
+                    auth.requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/api/v1/workspaces/**").permitAll();
                     auth.anyRequest().authenticated();
                 })
                 .sessionManagement(session -> session

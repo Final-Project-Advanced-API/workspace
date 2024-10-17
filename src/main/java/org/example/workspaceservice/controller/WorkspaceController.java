@@ -88,7 +88,4 @@ public class WorkspaceController {
                 .build();
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
-
-
-
 }

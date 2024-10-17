@@ -1,27 +1,20 @@
 package org.example.workspaceservice.model.response;
-
-
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.UUID;
-
+import lombok.*;
 @Setter
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString
 public class UserResponse {
-    private UUID userId;
-    private String userName;
+    private String userId;
+    private String username;
     private String fullName;
     private String gender;
-    private LocalDate dob;
-    private String profile;
+    private String dob;
     private String email;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private String createdDate;
+    private String updatedDate;
+    private String profile;
+    private String bio;
+    private Boolean isAdmin;
 }

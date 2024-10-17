@@ -1,17 +1,17 @@
 package org.example.workspaceservice.model.response;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import jakarta.persistence.Column;
+import lombok.*;
+
 import java.util.UUID;
 
 @Setter
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString
 public class UserWorkspaceResponse {
     private UUID userRoleId;
     private UUID userId;
-    private Boolean isAccept;
+    private UUID workspaceId;
     private Boolean isAdmin;
 }

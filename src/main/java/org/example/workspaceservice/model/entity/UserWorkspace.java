@@ -2,10 +2,8 @@ package org.example.workspaceservice.model.entity;
 
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+
 import java.util.UUID;
 
 @Entity
@@ -13,6 +11,7 @@ import java.util.UUID;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString
 public class UserWorkspace {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -21,7 +20,6 @@ public class UserWorkspace {
     private UUID userId;
     @Column(nullable = false)
     private UUID workspaceId;
-    private Boolean isAccept;
     private Boolean isAdmin;
 
 }

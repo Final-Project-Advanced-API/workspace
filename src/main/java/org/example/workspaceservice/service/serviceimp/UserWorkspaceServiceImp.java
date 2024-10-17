@@ -2,29 +2,21 @@ package org.example.workspaceservice.service.serviceimp;
 
 import feign.FeignException;
 import jakarta.mail.MessagingException;
-import jakarta.mail.SendFailedException;
-import jakarta.mail.internet.MimeMessage;
 import lombok.AllArgsConstructor;
-import lombok.SneakyThrows;
 import org.example.workspaceservice.Client.UserClient;
-import org.example.workspaceservice.exception.BadRequestException;
-import org.example.workspaceservice.exception.ConflictException;
 import org.example.workspaceservice.exception.ForbiddenException;
 import org.example.workspaceservice.exception.NotFoundException;
 import org.example.workspaceservice.model.entity.UserWorkspace;
-import org.example.workspaceservice.model.request.AcceptRequest;
 import org.example.workspaceservice.model.request.RemoveUserRequest;
 import org.example.workspaceservice.model.request.UserWorkspaceRequest;
 import org.example.workspaceservice.model.response.ApiResponse;
 import org.example.workspaceservice.model.response.UserResponse;
 import org.example.workspaceservice.repository.UserWorkspaceRepository;
 import org.example.workspaceservice.repository.WorkspaceRepository;
-import org.example.workspaceservice.service.MailSenderService;
 import org.example.workspaceservice.service.UserWorkspaceService;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.Optional;
 import java.util.UUID;
 
@@ -34,14 +26,12 @@ public class UserWorkspaceServiceImp implements UserWorkspaceService {
     private final WorkspaceRepository workspaceRepository;
     private final UserWorkspaceRepository userWorkspaceRepository;
     private final UserClient userClient;
-    private final MailSenderService mailSenderService;
-
 
     public String getCurrentUser() {
         return SecurityContextHolder.getContext().getAuthentication().getName();
     }
     @Override
-    public UserWorkspace inviteCollaboratorIntoWorkspace(UserWorkspaceRequest userWorkspaceRequest) throws MessagingException {
+    public UserWorkspace inviteCollaboratorIntoWorkspace(UserWorkspaceRequest userWorkspaceRequest) {
         Optional<UserWorkspace> admin = userWorkspaceRepository.findByUserIdAndWorkspaceId(UUID.fromString(getCurrentUser()), userWorkspaceRequest.getWorkspaceId());
         if (admin.isPresent()) {
             if (!admin.get().getIsAdmin()) {
@@ -50,32 +40,19 @@ public class UserWorkspaceServiceImp implements UserWorkspaceService {
         } else {
             throw new NotFoundException("User workspace not found");
         }
-        ApiResponse<UserResponse> user;
-        try {
-            user = userClient.getUserByEmail(userWorkspaceRequest.getEmail());
-        } catch (FeignException.NotFound e) {
-            throw new NotFoundException("User with email " + userWorkspaceRequest.getEmail() + " not found");
+        ApiResponse<UserResponse> user = userClient.getUserByEmail(userWorkspaceRequest.getEmail());
+        System.out.println("User email found"+user);
+        if(user.getPayload().getUserId()==null) {
+            throw new NotFoundException("User email not found");
         }
+
         workspaceRepository.findById(userWorkspaceRequest.getWorkspaceId()).orElseThrow(() -> new NotFoundException("Workspace id " + userWorkspaceRequest.getWorkspaceId() + " not found"));
-        mailSenderService.sendMail(user.getPayload().getEmail(), user.getPayload().getUserId(), userWorkspaceRequest.getWorkspaceId().toString(), false);
         UserWorkspace userWorkspace = new UserWorkspace();
-        userWorkspace.setUserId(user.getPayload().getUserId());
+        userWorkspace.setUserId(UUID.fromString(user.getPayload().getUserId()));
         userWorkspace.setWorkspaceId(userWorkspaceRequest.getWorkspaceId());
         userWorkspace.setIsAdmin(false);
-        userWorkspace.setIsAccept(false);
         userWorkspaceRepository.save(userWorkspace);
         return userWorkspace;
-    }
-
-    @Override
-    public void acceptToJoinWorkspace(UUID userId, UUID workspaceId, Boolean isAccept) {
-        Optional<UserWorkspace> userWorkspace = userWorkspaceRepository.findByUserIdAndWorkspaceId(userId, workspaceId);
-        if (userWorkspace.isPresent()) {
-            userWorkspace.get().setIsAccept(isAccept);
-            userWorkspaceRepository.save(userWorkspace.get());
-        } else {
-            throw new NotFoundException("User workspace not found");
-        }
     }
 
     @Transactional

@@ -25,7 +25,7 @@ public class UserWorkspaceController {
 
     @PostMapping
     @Operation(summary = "invite collaborator into workspace")
-    public ResponseEntity<?> inviteCollaboratorIntoWorkspace(@RequestBody @Valid UserWorkspaceRequest userWorkspaceRequest) throws MessagingException {
+    public ResponseEntity<?> inviteCollaboratorIntoWorkspace(@RequestBody @Valid UserWorkspaceRequest userWorkspaceRequest) {
         ApiResponse<?> response = ApiResponse.builder()
                 .message("Invite collaborator into workspace successfully")
                 .payload(userWorkspaceService.inviteCollaboratorIntoWorkspace(userWorkspaceRequest))
@@ -40,28 +40,13 @@ public class UserWorkspaceController {
     @Operation(summary = "remove collaborator from workspace")
     public ResponseEntity<?> removeCollaboratorFromWorkspace(@RequestBody @Valid RemoveUserRequest removeUserRequest) {
         ApiResponse<?> response = ApiResponse.builder()
-                .message("Delete collaborator from workspace successfully")
+                .message("Remove collaborator from workspace successfully")
                 .payload(userWorkspaceService.removeCollaboratorFromWorkspace(removeUserRequest))
                 .status(HttpStatus.OK)
                 .statusCode(HttpStatus.OK.value())
                 .timestamp(LocalDateTime.now())
                 .build();
         return new ResponseEntity<>(response, HttpStatus.OK);
-    }
-
-    @GetMapping("/accept")
-    @Operation(summary = "accept to join workspace")
-    public ResponseEntity<?> acceptToJoinWorkspace(@RequestParam @Valid UUID userId, @RequestParam @Valid UUID workspaceId, @RequestParam Boolean isAccept) throws MessagingException {
-        userWorkspaceService.acceptToJoinWorkspace(userId, workspaceId, isAccept);
-        String redirectUrl;
-        if (isAccept) {
-            redirectUrl = "https://chatgpt.com";
-        }else {
-            redirectUrl = "https://gemini.google.com";
-        }
-        return ResponseEntity.status(HttpStatus.FOUND)
-                .header("Location", redirectUrl)
-                .build();
     }
 
 }

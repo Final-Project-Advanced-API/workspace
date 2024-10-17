@@ -11,6 +11,8 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: true
+
+
   #config mail sender
   mail:
     host: smtp.gmail.com
@@ -23,7 +25,8 @@ spring:
           auth: true
           starttls:
             enable: true
-#Resource server configuration
+
+  #Resource server configuration
   security:
     oauth2:
       resource-server:
@@ -39,16 +42,6 @@ keycloak:
     secret: tDbzKXKsHvvmFQAJ1bUSR87Dbia2ssfZ
     provider: secret
 
-    # config with circuit breaker
-    cloud:
-      openfeign:
-        circuitbreaker:
-          enabled: true
-        compression:
-          request:
-            enabled: true
-          response:
-            enabled: true
 
 # connect with eureka server
 eureka:
@@ -57,7 +50,6 @@ eureka:
       defaultZone: https://eureka.jelay.site/eureka/  # Adjust for your Eureka server URL
   instance:
     prefer-ip-address: true
-
 
 # Swagger configuration
 springdoc:
@@ -70,6 +62,6 @@ springdoc:
 
 logging:
   level:
-    org.springframework.web: debug
+    org.example.workspaceservice.WorkspaceServiceApplication : error
 server:
   port: 8084
