@@ -23,8 +23,6 @@ public class UserClientFallback implements UserClient {
                 .build();
     }
 
-
-
     @Override
     public ApiResponse<UserResponse> getUserById(UUID userId) {
         return null;
