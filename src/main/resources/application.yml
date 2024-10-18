@@ -3,9 +3,9 @@ spring:
     name: workspace-service
   # integrate with postgres
   datasource:
-    url: jdbc:postgresql://localhost:5432/stack_note
-    username: postgres
-    password: 2003
+    url: jdbc:postgresql://165.22.244.160:8084/workspace
+    username: workspace
+    password: 8084
 
 #  cloud:
 #    openfeign:
@@ -65,14 +65,6 @@ springdoc:
       client-secret: tDbzKXKsHvvmFQAJ1bUSR87Dbia2ssfZ
     tags-sorter: alpha
 
-#resilience4j:
-#  circuitbreaker:
-#    instances:
-#      userid:
-#        failureRateThreshold: 50
-#        waitDurationInOpenState: 10000
-#        slidingWindowSize: 10
-#        minimumNumberOfCalls: 5
 logging:
   level:
     org.example: debug
