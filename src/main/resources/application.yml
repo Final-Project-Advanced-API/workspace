@@ -6,30 +6,16 @@ spring:
     url: jdbc:postgresql://165.22.244.160:8084/workspace
     username: workspace
     password: 8084
-
-#  cloud:
-#    openfeign:
-#      circuitbreaker:
-#        enabled: true
-
   # spring data jpa
   jpa:
     hibernate:
       ddl-auto: update
     show-sql: true
 
-  #config mail sender
-  mail:
-    host: smtp.gmail.com
-    port: 587
-    username: bugzapper.hrd@gmail.com
-    password: dbblamycivtocqki
-    properties:
-      mail:
-        smtp:
-          auth: true
-          starttls:
-            enable: true
+  #  cloud:
+  #    openfeign:
+  #      circuitbreaker:
+  #        enabled: true
 
   #Resource server configuration
   security:
@@ -46,7 +32,6 @@ keycloak:
     client-id: stack-notes-client
     secret: tDbzKXKsHvvmFQAJ1bUSR87Dbia2ssfZ
     provider: secret
-
 
 # connect with eureka server
 eureka:

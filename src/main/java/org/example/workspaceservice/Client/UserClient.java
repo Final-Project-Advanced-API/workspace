@@ -17,7 +17,7 @@ public interface UserClient {
 
     @GetMapping("/api/v1/users/email")
     ApiResponse<UserResponse> getUserByEmail(@RequestParam String email);
-//    @CircuitBreaker(name = "userid", fallbackMethod = "UserClientFallback#getUserById")
+
     @GetMapping("/api/v1/users/{userId}")
     ApiResponse<UserResponse> getUserById(@PathVariable UUID userId);
 }

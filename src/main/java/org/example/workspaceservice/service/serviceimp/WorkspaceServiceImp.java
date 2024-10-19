@@ -14,16 +14,12 @@ import org.example.workspaceservice.repository.UserWorkspaceRepository;
 import org.example.workspaceservice.repository.WorkspaceRepository;
 import org.example.workspaceservice.service.WorkspaceService;
 import org.modelmapper.ModelMapper;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
-
-
 @Service
 @AllArgsConstructor
 public class WorkspaceServiceImp implements WorkspaceService {
