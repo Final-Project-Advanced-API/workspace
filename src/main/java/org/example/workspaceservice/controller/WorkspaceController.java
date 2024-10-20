@@ -17,7 +17,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/v1/workspaces")
 @SecurityRequirement(name = "stack-notes")
-@CrossOrigin(origins = "*")
+@CrossOrigin
 public class WorkspaceController {
     private final WorkspaceService workspaceService;
     public WorkspaceController(WorkspaceService workspaceService) {

@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 @RequestMapping("/api/v1/userworkspaces")
 @AllArgsConstructor
 @SecurityRequirement(name = "stack-notes")
-@CrossOrigin(origins = "*")
+@CrossOrigin
 public class UserWorkspaceController {
     private final UserWorkspaceService userWorkspaceService;
 
