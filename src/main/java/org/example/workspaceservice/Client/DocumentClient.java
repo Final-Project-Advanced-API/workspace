@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import java.util.UUID;
 
-@FeignClient(name = "document-service",url = "http://localhost:8085",fallback = DocumentClientFallback.class )
+@FeignClient(name = "document-service",url = "http://localhost:8085",configuration = DocumentClientFallback.class,fallback = DocumentClientFallback.class )
 @Primary
 public interface DocumentClient {
     @DeleteMapping("/api/v1/documents/workspace/{workspaceId}")

@@ -14,7 +14,6 @@ import java.util.UUID;
 @FeignClient(name = "user-service",url = "http://localhost:8081",configuration = FeignClientConfig.class, fallback = UserClientFallback.class)
 @Primary
 public interface UserClient {
-
     @GetMapping("/api/v1/users/email")
     ApiResponse<UserResponse> getUserByEmail(@RequestParam String email);
 
