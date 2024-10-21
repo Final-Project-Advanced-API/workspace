@@ -3,7 +3,7 @@ spring:
     name: workspace-service
   # integrate with postgres
   datasource:
-    url: jdbc:postgresql://165.22.244.160:8084/workspace
+    url: jdbc:postgresql://188.166.255.182:8084/workspace
     username: workspace
     password: 8084
   # spring data jpa
