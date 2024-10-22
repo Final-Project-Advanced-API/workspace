@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import java.util.UUID;
 
-@FeignClient(name = "user-service",configuration = FeignClientConfig.class, fallback = UserClientFallback.class)
+@FeignClient(name = "user-service",url = "localhost:8081",configuration = FeignClientConfig.class, fallback = UserClientFallback.class)
 @Primary
 public interface UserClient {
     @GetMapping("/api/v1/users/email")

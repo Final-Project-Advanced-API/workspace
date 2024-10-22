@@ -1,9 +1,6 @@
 package org.example.workspaceservice.model.entity;
-
-
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.util.UUID;
 
 @Entity
@@ -21,5 +18,4 @@ public class UserWorkspace {
     @Column(nullable = false)
     private UUID workspaceId;
     private Boolean isAdmin;
-
 }

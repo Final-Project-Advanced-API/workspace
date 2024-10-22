@@ -19,7 +19,6 @@ import java.util.UUID;
 public class UserWorkspaceRequest {
     @Email
     @NotBlank
-    @NotNull
     @Pattern(regexp = "^[A-Za-z0-9+_.-]+@gmail\\.com$",
             message = "Invalid email!")
     private String email;

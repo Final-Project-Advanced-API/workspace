@@ -1,6 +1,4 @@
 package org.example.workspaceservice.Client;
-
-
 import org.example.workspaceservice.model.request.NotificationRequest;
 import org.example.workspaceservice.model.response.ApiResponse;
 import org.springframework.cloud.openfeign.FeignClient;

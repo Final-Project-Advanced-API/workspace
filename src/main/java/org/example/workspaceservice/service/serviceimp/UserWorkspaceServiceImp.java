@@ -6,26 +6,25 @@ import org.example.workspaceservice.Client.UserClient;
 import org.example.workspaceservice.exception.ForbiddenException;
 import org.example.workspaceservice.exception.NotFoundException;
 import org.example.workspaceservice.model.entity.UserWorkspace;
-import org.example.workspaceservice.model.entity.Workspace;
+import org.example.workspaceservice.model.entity.WorkspaceElastic;
 import org.example.workspaceservice.model.request.NotificationRequest;
 import org.example.workspaceservice.model.request.RemoveUserRequest;
 import org.example.workspaceservice.model.request.UserWorkspaceRequest;
 import org.example.workspaceservice.model.response.ApiResponse;
 import org.example.workspaceservice.model.response.UserResponse;
 import org.example.workspaceservice.repository.UserWorkspaceRepository;
-import org.example.workspaceservice.repository.WorkspaceRepository;
+import org.example.workspaceservice.repository.WorkspaceElasticRepository;
 import org.example.workspaceservice.service.UserWorkspaceService;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.Optional;
 import java.util.UUID;
 
 @Service
 @AllArgsConstructor
 public class UserWorkspaceServiceImp implements UserWorkspaceService {
-    private final WorkspaceRepository workspaceRepository;
+    private final WorkspaceElasticRepository workspaceElasticRepository;
     private final UserWorkspaceRepository userWorkspaceRepository;
     private final UserClient userClient;
     private final NotificationClient notificationClient;
@@ -35,7 +34,7 @@ public class UserWorkspaceServiceImp implements UserWorkspaceService {
     }
 
     @Override
-    public UserWorkspace inviteCollaboratorIntoWorkspace(UserWorkspaceRequest userWorkspaceRequest) {
+    public Void inviteCollaboratorIntoWorkspace(UserWorkspaceRequest userWorkspaceRequest) {
         Optional<UserWorkspace> admin = userWorkspaceRepository.findByUserIdAndWorkspaceId(UUID.fromString(getCurrentUser()), userWorkspaceRequest.getWorkspaceId());
         if (admin.isPresent()) {
             if (!admin.get().getIsAdmin()) {
@@ -45,19 +44,17 @@ public class UserWorkspaceServiceImp implements UserWorkspaceService {
             throw new NotFoundException("User workspace not found");
         }
         ApiResponse<UserResponse> user = userClient.getUserByEmail(userWorkspaceRequest.getEmail());
-        System.out.println("User email found" + user);
         if (user.getPayload().getUserId() == null) {
             throw new NotFoundException("User email not found");
         }
-
-        Workspace workspace = workspaceRepository.findById(userWorkspaceRequest.getWorkspaceId()).orElseThrow(() -> new NotFoundException("Workspace id " + userWorkspaceRequest.getWorkspaceId() + " not found"));
-        notificationClient.sendNotificationToUser(new NotificationRequest("Stack Notes","Someone add to workspace "+workspace.getWorkspaceName(),getCurrentUser(),user.getPayload().getUserId()));
+        WorkspaceElastic workspaceElastic = workspaceElasticRepository.findById(userWorkspaceRequest.getWorkspaceId()).orElseThrow(() -> new NotFoundException("Workspace id " + userWorkspaceRequest.getWorkspaceId() + " not found"));
+        notificationClient.sendNotificationToUser(new NotificationRequest("Stack Notes","Someone add to workspace "+workspaceElastic.getWorkspaceName(),getCurrentUser(),user.getPayload().getUserId()));
         UserWorkspace userWorkspace = new UserWorkspace();
         userWorkspace.setUserId(UUID.fromString(user.getPayload().getUserId()));
         userWorkspace.setWorkspaceId(userWorkspaceRequest.getWorkspaceId());
         userWorkspace.setIsAdmin(false);
         userWorkspaceRepository.save(userWorkspace);
-        return userWorkspace;
+        return null;
     }
 
     @Transactional

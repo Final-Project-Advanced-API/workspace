@@ -7,11 +7,14 @@ spring:
     username: workspace
     password: 8084
   # spring data jpa
+  elasticsearch:
+    uris: http://188.166.255.182:9200
+    username: elastic
+    password: 3pQHuGDxQEe0JXtivdb+
   jpa:
     hibernate:
       ddl-auto: update
     show-sql: true
-
   #  cloud:
   #    openfeign:
   #      circuitbreaker:
