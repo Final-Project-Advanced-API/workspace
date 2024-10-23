@@ -19,7 +19,7 @@ import java.util.UUID;
 public class WorkspaceElastic {
     @Id
     private UUID workspaceId;
-    @Field(type = FieldType.Text, analyzer = "standard", searchAnalyzer = "standard")
+    @Field(type = FieldType.Text)
     private String workspaceName;
     @Field(type = FieldType.Boolean)
     private Boolean isPrivate;

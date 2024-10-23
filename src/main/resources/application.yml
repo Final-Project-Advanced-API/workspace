@@ -6,11 +6,12 @@ spring:
     url: jdbc:postgresql://188.166.255.182:8084/workspace
     username: workspace
     password: 8084
-  # spring data jpa
+  # spring data elastic
   elasticsearch:
     uris: http://188.166.255.182:9200
     username: elastic
     password: 3pQHuGDxQEe0JXtivdb+
+  #spring data jpa
   jpa:
     hibernate:
       ddl-auto: update

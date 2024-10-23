@@ -83,6 +83,8 @@ public class WorkspaceServiceImp implements WorkspaceService {
                 workspaceResponse.setUsers(userResponses);
                 workspaceResponses.add(workspaceResponse);
             });
+        }else {
+            return Collections.emptyList();
         }
         return workspaceResponses;
     }
@@ -114,13 +116,13 @@ public class WorkspaceServiceImp implements WorkspaceService {
     }
 
 
-
+    @Transactional
     @Override
     public Void deleteWorkspace(UUID workspaceId) {
-        //find workspace
-        Workspace workspace = workspaceRepository.findById(workspaceId).orElseThrow(() -> new NotFoundException("Workspace id " + workspaceId + " not found"));
         //find elastic
         WorkspaceElastic workspaceElastic = workspaceElasticRepository.findById(workspaceId).orElseThrow(() -> new NotFoundException("Workspace id " + workspaceId + " not found"));
+        //find workspace
+        Workspace workspace = workspaceRepository.findById(workspaceId).orElseThrow(() -> new NotFoundException("Workspace id " + workspaceId + " not found"));
         Optional<UserWorkspace> userWorkspace = userWorkspaceRepository.findByUserIdAndWorkspaceId(UUID.fromString(getCurrentUser()), workspaceId);
         if (userWorkspace.isPresent()) {
             if (!userWorkspace.get().getIsAdmin()) {
