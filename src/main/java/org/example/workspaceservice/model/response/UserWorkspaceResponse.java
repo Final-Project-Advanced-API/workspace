@@ -1,9 +1,6 @@
 package org.example.workspaceservice.model.response;
-import jakarta.persistence.Column;
 import lombok.*;
-
 import java.util.UUID;
-
 @Setter
 @Getter
 @AllArgsConstructor
