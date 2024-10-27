@@ -1,5 +1,6 @@
 package org.example.workspaceservice.service.serviceimp;
 
+import feign.FeignException;
 import lombok.AllArgsConstructor;
 import org.example.workspaceservice.Client.DocumentClient;
 import org.example.workspaceservice.Client.UserClient;
@@ -19,7 +20,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -124,11 +124,15 @@ public class WorkspaceServiceImp implements WorkspaceService {
     @Override
     public Void deleteWorkspace(UUID workspaceId) {
         Optional<UserWorkspace> userWorkspace = userWorkspaceRepository.findByUserIdAndWorkspaceId(UUID.fromString(getCurrentUser()), workspaceId);
-        if (!userWorkspace.isPresent()) {
+        if (userWorkspace.isEmpty()) {
             throw new NotFoundException("Workspace id " + workspaceId + " not found!");
         }
         if(!userWorkspace.get().getIsAdmin()) {
             throw new ForbiddenException("User not allowed delete this workspace!");
+        }
+        try {
+            documentClient.deleteDocumentByWorkspaceId(workspaceId);
+        } catch (FeignException.NotFound ignored) {
         }
         //find elastic
         WorkspaceElastic workspaceElastic = workspaceElasticRepository.findById(workspaceId).orElseThrow(() -> new NotFoundException("Workspace id " + workspaceId + " not found"));
@@ -140,8 +144,7 @@ public class WorkspaceServiceImp implements WorkspaceService {
         userWorkspaceRepository.deleteByWorkspaceId(workspaceId);
         //delete elastic
         workspaceElasticRepository.delete(workspaceElastic);
-        //delete document
-        documentClient.deleteDocumentByWorkspaceId(workspaceId);
+
         return null;
     }
 
@@ -149,7 +152,7 @@ public class WorkspaceServiceImp implements WorkspaceService {
     public WorkspaceResponse getWorkspace(UUID workspaceId) {
         Optional<UserWorkspace> lstUserWorkspace = userWorkspaceRepository.findByUserIdAndWorkspaceId(
                 UUID.fromString(getCurrentUser()), workspaceId);
-        if(!lstUserWorkspace.isPresent()) {
+        if(lstUserWorkspace.isEmpty()) {
             throw new NotFoundException("Workspace id " + workspaceId + " not found!");
         }
         WorkspaceElastic workspaceElastic = workspaceElasticRepository.findById(workspaceId).orElseThrow(() -> new NotFoundException("Workspace id " + workspaceId + " not found"));
@@ -171,7 +174,8 @@ public class WorkspaceServiceImp implements WorkspaceService {
     @Override
     public Void updateStatusWorkspace(UUID workspaceId, Boolean isPrivate) {
         Optional<UserWorkspace> userWorkspace = userWorkspaceRepository.findByUserIdAndWorkspaceId(UUID.fromString(getCurrentUser()), workspaceId);
-        if (!userWorkspace.isPresent()) {
+        System.out.println("Workspace"+userWorkspace);
+        if (userWorkspace.isEmpty()) {
             throw new NotFoundException("Workspace id " + workspaceId + " not found!");
         }
         if(!userWorkspace.get().getIsAdmin()) {
