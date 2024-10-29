@@ -12,11 +12,6 @@ spring:
       ddl-auto: update
     show-sql: true
 
-  #  cloud:
-  #    openfeign:
-  #      circuitbreaker:
-  #        enabled: true
-
   #Resource server configuration
   security:
     oauth2:
