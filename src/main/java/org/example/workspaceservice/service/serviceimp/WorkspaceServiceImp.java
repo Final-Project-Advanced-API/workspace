@@ -100,7 +100,7 @@ public class WorkspaceServiceImp implements WorkspaceService {
     @Override
     public WorkspaceResponse updateWorkspace(UUID workspaceId, WorkspaceRequest workspaceRequest) {
         Optional<UserWorkspace> userWorkspace = userWorkspaceRepository.findByUserIdAndWorkspaceId(UUID.fromString(getCurrentUser()), workspaceId);
-        if (!userWorkspace.isPresent()) {
+        if (userWorkspace.isEmpty()) {
             throw new NotFoundException("Workspace id " + workspaceId + " not found!");
         }
         if(!userWorkspace.get().getIsAdmin()) {
@@ -136,15 +136,12 @@ public class WorkspaceServiceImp implements WorkspaceService {
         }
         //find elastic
         WorkspaceElastic workspaceElastic = workspaceElasticRepository.findById(workspaceId).orElseThrow(() -> new NotFoundException("Workspace id " + workspaceId + " not found"));
-        //find workspace
-        Workspace workspace = workspaceRepository.findById(workspaceId).orElseThrow(() -> new NotFoundException("Workspace id " + workspaceId + " not found!"));
         //delete workspace
-        workspaceRepository.delete(workspace);
+        workspaceRepository.deleteById(workspaceId);
         //delete user-workspace
         userWorkspaceRepository.deleteByWorkspaceId(workspaceId);
         //delete elastic
         workspaceElasticRepository.delete(workspaceElastic);
-
         return null;
     }
 
@@ -174,7 +171,6 @@ public class WorkspaceServiceImp implements WorkspaceService {
     @Override
     public Void updateStatusWorkspace(UUID workspaceId, Boolean isPrivate) {
         Optional<UserWorkspace> userWorkspace = userWorkspaceRepository.findByUserIdAndWorkspaceId(UUID.fromString(getCurrentUser()), workspaceId);
-        System.out.println("Workspace"+userWorkspace);
         if (userWorkspace.isEmpty()) {
             throw new NotFoundException("Workspace id " + workspaceId + " not found!");
         }
