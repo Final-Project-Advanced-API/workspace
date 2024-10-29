@@ -3,23 +3,27 @@ spring:
     name: workspace-service
   # integrate with postgres
   datasource:
-    url: jdbc:postgresql://188.166.255.182:8084/workspace
-    username: workspace
-    password: 8084
-  # spring data jpa
+    url: jdbc:postgresql://localhost:5432/stack_note
+    username: postgres
+    password: 2003
+  # spring data elastic
+  elasticsearch:
+    uris: http://localhost:9200
+
+  #  #spring data jpa
   jpa:
     hibernate:
       ddl-auto: update
     show-sql: true
 
-  #Resource server configuration
+  #  #Resource server configuration
   security:
     oauth2:
       resource-server:
         jwt:
           issuer-uri: https://keycloak.jelay.site/realms/stack-notes
           jwk-set-uri: ${spring.security.oauth2.resource-server.jwt.issuer-uri}/protocol/openid-connect/certs
-# Keycloak configuration
+## Keycloak configuration
 keycloak:
   auth-server-url: https://keycloak.jelay.site/
   realm: stack-notes
@@ -28,7 +32,7 @@ keycloak:
     secret: tDbzKXKsHvvmFQAJ1bUSR87Dbia2ssfZ
     provider: secret
 
-# connect with eureka server
+## connect with eureka server
 eureka:
   client:
     service-url:
@@ -36,7 +40,7 @@ eureka:
   instance:
     prefer-ip-address: true
 
-# Swagger configuration
+## Swagger configuration
 springdoc:
   swagger-ui:
     oauth:

@@ -38,7 +38,7 @@ public class WorkspaceController {
     }
 
     @GetMapping
-    @Operation(summary = "get all workspace")
+    @Operation(summary = "get all workspace by user")
     public ResponseEntity<?> getAllWorkspace() {
         ApiResponse<?> response = ApiResponse.builder()
                 .message("Get all workspace successfully")
@@ -82,6 +82,18 @@ public class WorkspaceController {
         ApiResponse<?> response = ApiResponse.builder()
                 .message("Delete workspace successfully")
                 .payload(workspaceService.deleteWorkspace(workspaceId))
+                .status(HttpStatus.OK)
+                .statusCode(HttpStatus.OK.value())
+                .timestamp(LocalDateTime.now())
+                .build();
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+    @PutMapping("/{workspaceId}/status")
+    @Operation(summary = "change status private or public workspace")
+    public ResponseEntity<?> updateStatusWorkspace(@PathVariable @Valid UUID workspaceId,@RequestParam(defaultValue = "true") Boolean isPrivate) {
+        ApiResponse<?> response = ApiResponse.builder()
+                .message("Update status workspace successfully")
+                .payload(workspaceService.updateStatusWorkspace(workspaceId,isPrivate))
                 .status(HttpStatus.OK)
                 .statusCode(HttpStatus.OK.value())
                 .timestamp(LocalDateTime.now())

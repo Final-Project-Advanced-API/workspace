@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/userworkspaces")
@@ -40,6 +41,19 @@ public class UserWorkspaceController {
         ApiResponse<?> response = ApiResponse.builder()
                 .message("Remove collaborator from workspace successfully")
                 .payload(userWorkspaceService.removeCollaboratorFromWorkspace(removeUserRequest))
+                .status(HttpStatus.OK)
+                .statusCode(HttpStatus.OK.value())
+                .timestamp(LocalDateTime.now())
+                .build();
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @GetMapping
+    @Operation(summary = "get by user and workspace id")
+    public ResponseEntity<?> getUserByUserIdAndWorkspaceId(@RequestParam UUID userId ,@RequestParam UUID workspaceId) {
+        ApiResponse<?> response = ApiResponse.builder()
+                .message("Get user and workspace by id successfully")
+                .payload(userWorkspaceService.getUserByUserIdAndWorkspaceId(userId,workspaceId))
                 .status(HttpStatus.OK)
                 .statusCode(HttpStatus.OK.value())
                 .timestamp(LocalDateTime.now())

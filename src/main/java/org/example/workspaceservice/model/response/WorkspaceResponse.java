@@ -1,8 +1,6 @@
 package org.example.workspaceservice.model.response;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
-
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;

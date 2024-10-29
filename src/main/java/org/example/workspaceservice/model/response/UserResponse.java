@@ -12,9 +12,9 @@ public class UserResponse {
     private String gender;
     private String dob;
     private String email;
-    private String createdDate;
-    private String updatedDate;
     private String profile;
     private String bio;
     private Boolean isAdmin;
+    private String createdDate;
+    private String updatedDate;
 }
