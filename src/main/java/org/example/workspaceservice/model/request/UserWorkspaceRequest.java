@@ -20,7 +20,7 @@ public class UserWorkspaceRequest {
     @Email
     @NotBlank
     @Pattern(regexp = "^[A-Za-z0-9+_.-]+@gmail\\.com$",
-            message = "Invalid email!")
+            message = "Email invalid! Ex: useremail@gamil.com")
     private String email;
     private UUID workspaceId;
 }

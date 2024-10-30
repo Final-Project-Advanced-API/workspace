@@ -7,6 +7,7 @@ import org.example.workspaceservice.exception.ConflictException;
 import org.example.workspaceservice.exception.ForbiddenException;
 import org.example.workspaceservice.exception.NotFoundException;
 import org.example.workspaceservice.model.entity.UserWorkspace;
+import org.example.workspaceservice.model.entity.Workspace;
 import org.example.workspaceservice.model.request.NotificationRequest;
 import org.example.workspaceservice.model.request.RemoveUserRequest;
 import org.example.workspaceservice.model.request.UserWorkspaceRequest;
@@ -18,7 +19,6 @@ import org.example.workspaceservice.service.UserWorkspaceService;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.Optional;
 import java.util.UUID;
 
@@ -40,17 +40,17 @@ public class UserWorkspaceServiceImp implements UserWorkspaceService {
         if (user.getPayload().getUserId() == null) {
             throw new NotFoundException("User email not found!");
         }
-        workspaceRepository.findById(userWorkspaceRequest.getWorkspaceId()).orElseThrow(() -> new NotFoundException("Workspace id " + userWorkspaceRequest.getWorkspaceId() + " not found"));
+        workspaceRepository.findById(userWorkspaceRequest.getWorkspaceId()).orElseThrow(() -> new NotFoundException("Workspace id " + userWorkspaceRequest.getWorkspaceId() + " not found!"));
         Optional<UserWorkspace> admin = userWorkspaceRepository.findByUserIdAndWorkspaceId(UUID.fromString(getCurrentUser()), userWorkspaceRequest.getWorkspaceId());
         if (admin.isEmpty()) {
-            throw new NotFoundException("Workspace id " + userWorkspaceRequest.getWorkspaceId() + " not found!");
+            throw new ForbiddenException("You don't have permission to access this workspace!");
         }
         if (!admin.get().getIsAdmin()) {
-            throw new ForbiddenException("User not allowed invite collaborator this workspace.");
+            throw new ForbiddenException("Collaborator is not allowed invite member into this workspace!");
         }
         Optional<UserWorkspace> existUser = userWorkspaceRepository.findByUserIdAndWorkspaceId(UUID.fromString(user.getPayload().getUserId()), userWorkspaceRequest.getWorkspaceId());
         if (existUser.isPresent()) {
-            throw new ConflictException("Collaborator already exists join this workspace");
+            throw new ConflictException("User already exists join this workspace!");
         }
         NotificationRequest nr = new NotificationRequest();
         nr.setMessage("Stack Notes");
@@ -69,16 +69,25 @@ public class UserWorkspaceServiceImp implements UserWorkspaceService {
     @Transactional
     @Override
     public Void removeCollaboratorFromWorkspace(RemoveUserRequest removeUserRequest) {
+        Optional<Workspace> workspace = workspaceRepository.findById(removeUserRequest.getWorkspaceId());
+        if (workspace.isEmpty()) {
+            throw new NotFoundException("Workspace id " + removeUserRequest.getWorkspaceId() + " not found!");
+        }
+        Optional<UserWorkspace> user = userWorkspaceRepository.findByUserIdAndWorkspaceId(
+                removeUserRequest.getUserId(), removeUserRequest.getWorkspaceId());
+        if (user.isEmpty()) {
+            throw new NotFoundException("User id " + removeUserRequest.getUserId() + " not found!");
+        }
         Optional<UserWorkspace> userWorkspace = userWorkspaceRepository.findByUserIdAndWorkspaceId(
                 UUID.fromString(getCurrentUser()), removeUserRequest.getWorkspaceId());
         if (userWorkspace.isEmpty()) {
-            throw new NotFoundException("Workspace id " + removeUserRequest.getWorkspaceId() + " not found!");
+            throw new ForbiddenException("You don't have permission to access this workspace!");
         }
         if (!userWorkspace.get().getIsAdmin()) {
-            throw new ForbiddenException("User not allowed to remove collaborator from this workspace.");
+            throw new ForbiddenException("User not allowed to remove collaborator from this workspace!");
         }
         if(userWorkspace.get().getUserId().equals(removeUserRequest.getUserId())) {
-            throw new ForbiddenException("User not allowed to remove admin from this workspace.");
+            throw new ForbiddenException("User not allowed to remove admin from this workspace!");
         }
         userWorkspaceRepository.deleteByUserIdAndWorkspaceId(removeUserRequest.getUserId(), removeUserRequest.getWorkspaceId());
         return null;
