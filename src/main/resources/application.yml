@@ -15,7 +15,6 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: true
-
   #  #Resource server configuration
   security:
     oauth2:
@@ -23,6 +22,56 @@ spring:
         jwt:
           issuer-uri: https://keycloak.jelay.site/realms/stack-notes
           jwk-set-uri: ${spring.security.oauth2.resource-server.jwt.issuer-uri}/protocol/openid-connect/certs
+  # circuit breaker with feign
+  cloud:
+    openfeign:
+      circuitbreaker:
+        enabled: true
+      compression:
+        response:
+          enabled: true
+        request:
+          enabled: true
+resilience4j:
+  circuitbreaker:
+    instances:
+      UserClientgetUserByEmail:
+        register-health-indicator: true
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 10s
+        permitted-number-of-calls-in-half-open-state: 3
+        sliding-window-size: 20
+        minimum-number-of-calls: 5
+        automatic-transition-from-open-to-half-open-enabled: true
+        sliding-window-type: COUNT_BASED
+      UserClientgetUserByIdStringUUID:
+        register-health-indicator: true
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 10s
+        permitted-number-of-calls-in-half-open-state: 3
+        sliding-window-size: 20
+        minimum-number-of-calls: 5
+        automatic-transition-from-open-to-half-open-enabled: true
+        sliding-window-type: COUNT_BASED
+      NotificationClientsendNotificationToUser:
+        register-health-indicator: true
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 10s
+        permitted-number-of-calls-in-half-open-state: 3
+        sliding-window-size: 20
+        minimum-number-of-calls: 5
+        automatic-transition-from-open-to-half-open-enabled: true
+        sliding-window-type: COUNT_BASED
+      DocumentClientdeleteDocumentByWorkspaceIdStringUUID:
+        register-health-indicator: true
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 10s
+        permitted-number-of-calls-in-half-open-state: 3
+        sliding-window-size: 20
+        minimum-number-of-calls: 5
+        automatic-transition-from-open-to-half-open-enabled: true
+        sliding-window-type: COUNT_BASED
+
 ## Keycloak configuration
 keycloak:
   auth-server-url: https://keycloak.jelay.site/
@@ -48,9 +97,15 @@ springdoc:
       client-id: stack-notes-client
       client-secret: tDbzKXKsHvvmFQAJ1bUSR87Dbia2ssfZ
     tags-sorter: alpha
-
 logging:
   level:
     org.example: debug
+    feign: DEBUG
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, metrics, circuitbreakers
 server:
   port: 8084

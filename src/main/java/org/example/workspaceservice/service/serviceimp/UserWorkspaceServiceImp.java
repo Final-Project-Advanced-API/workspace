@@ -16,7 +16,10 @@ import org.example.workspaceservice.model.response.UserResponse;
 import org.example.workspaceservice.repository.UserWorkspaceRepository;
 import org.example.workspaceservice.repository.WorkspaceRepository;
 import org.example.workspaceservice.service.UserWorkspaceService;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
@@ -33,10 +36,25 @@ public class UserWorkspaceServiceImp implements UserWorkspaceService {
     public String getCurrentUser() {
         return SecurityContextHolder.getContext().getAuthentication().getName();
     }
+    private String retrieveToken() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication instanceof JwtAuthenticationToken jwtAuthToken) {
+            return jwtAuthToken.getToken().getTokenValue();
+        }
+        return null;
+    }
+    public ApiResponse<UserResponse> getUserByEmail(String email) {
+        String token = retrieveToken();
+        return userClient.getUserByEmail("Bearer " + token,email);
+    }
+    public ResponseEntity<?> sendNotificationToUser(NotificationRequest notificationRequest) {
+        String token = retrieveToken();
+        return notificationClient.sendNotificationToUser("Bearer " + token,notificationRequest);
+    }
 
     @Override
     public Void inviteCollaboratorIntoWorkspace(UserWorkspaceRequest userWorkspaceRequest) {
-        ApiResponse<UserResponse> user = userClient.getUserByEmail(userWorkspaceRequest.getEmail());
+        ApiResponse<UserResponse> user = getUserByEmail(userWorkspaceRequest.getEmail());
         if (user.getPayload().getUserId() == null) {
             throw new NotFoundException("User email not found!");
         }
@@ -57,7 +75,7 @@ public class UserWorkspaceServiceImp implements UserWorkspaceService {
         nr.setTitle("Someone add to workspace");
         nr.setSenderId(getCurrentUser());
         nr.setReceiverId(user.getPayload().getUserId());
-        notificationClient.sendNotificationToUser(nr);
+        sendNotificationToUser(nr);
         UserWorkspace userWorkspace = new UserWorkspace();
         userWorkspace.setUserId(UUID.fromString(user.getPayload().getUserId()));
         userWorkspace.setWorkspaceId(userWorkspaceRequest.getWorkspaceId());

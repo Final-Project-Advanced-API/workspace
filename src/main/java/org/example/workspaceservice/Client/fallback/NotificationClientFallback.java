@@ -5,10 +5,12 @@ import org.example.workspaceservice.model.request.NotificationRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
+
 @Component
 public class NotificationClientFallback implements NotificationClient {
+
 	@Override
-	public ResponseEntity<?> sendNotificationToUser(NotificationRequest notificationRequest) {
+	public ResponseEntity<?> sendNotificationToUser(String authorization, NotificationRequest notificationRequest) {
 		return null;
 	}
 }

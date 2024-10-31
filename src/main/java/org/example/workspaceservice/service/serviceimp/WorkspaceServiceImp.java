@@ -16,7 +16,9 @@ import org.example.workspaceservice.repository.WorkspaceElasticRepository;
 import org.example.workspaceservice.repository.WorkspaceRepository;
 import org.example.workspaceservice.service.WorkspaceService;
 import org.modelmapper.ModelMapper;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,6 +39,25 @@ public class WorkspaceServiceImp implements WorkspaceService {
 		return SecurityContextHolder.getContext().getAuthentication().getName();
 	}
 
+	private String retrieveToken() {
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		if (authentication instanceof JwtAuthenticationToken jwtAuthToken) {
+			return jwtAuthToken.getToken().getTokenValue();
+		}
+		return null;
+	}
+
+	ApiResponse<UserResponse> getUserById(UUID userId) {
+		String tokenValue = retrieveToken();
+		return userClient.getUserById("Bearer " + tokenValue, userId);
+	}
+
+	void deleteDocumentByWorkspaceId(UUID workspaceId) {
+		String tokenValue = retrieveToken();
+		documentClient.deleteDocumentByWorkspaceId("Bearer " + tokenValue, workspaceId);
+	}
+
+
 	@Override
 	public WorkspaceResponse createWorkspace(WorkspaceRequest workspaceRequest) {
 		// add to workspace
@@ -55,11 +76,13 @@ public class WorkspaceServiceImp implements WorkspaceService {
 		WorkspaceResponse workspaceResponse = new WorkspaceResponse();
 		List<UserResponse> userResponses = new ArrayList<>();
 		WorkspaceElastic elastic = workspaceElasticRepository.save(modelMapper.map(ws, WorkspaceElastic.class));
-		ApiResponse<UserResponse> user = userClient.getUserById(UUID.fromString(getCurrentUser()));
-		UserResponse userResponse = user.getPayload();
-		userResponse.setIsAdmin(true);
-		userResponses.add(userResponse);
-		workspaceResponse.setUsers(userResponses);
+		ApiResponse<UserResponse> user = getUserById(UUID.fromString(getCurrentUser()));
+		if (user != null && user.getPayload() != null) {
+			UserResponse userResponse = user.getPayload();
+			userResponse.setIsAdmin(true);
+			userResponses.add(userResponse);
+			workspaceResponse.setUsers(userResponses);
+		}
 		modelMapper.map(elastic, workspaceResponse);
 		return workspaceResponse;
 	}
@@ -81,7 +104,7 @@ public class WorkspaceServiceImp implements WorkspaceService {
 				List<UserResponse> userResponses = new ArrayList<>();
 				if (!userWorkspaces.isEmpty()) {
 					userWorkspaces.forEach(userWorkspace -> {
-						ApiResponse<UserResponse> userApiResponse = userClient.getUserById(userWorkspace.getUserId());
+						ApiResponse<UserResponse> userApiResponse = getUserById(userWorkspace.getUserId());
 						if (userApiResponse != null && userApiResponse.getPayload() != null) {
 							UserResponse userResponse = modelMapper.map(userApiResponse.getPayload(), UserResponse.class);
 							userResponse.setIsAdmin(userWorkspace.getIsAdmin());
@@ -105,7 +128,7 @@ public class WorkspaceServiceImp implements WorkspaceService {
 			throw new ForbiddenException("You don't have permission to access this workspace!");
 		}
 		if (!userWorkspace.get().getIsAdmin()) {
-			throw new ForbiddenException("User is not allowed update this workspace!");
+			throw new ForbiddenException("You are collaborator allowed to update this workspace!");
 		}
 		Workspace workspace = workspaceRepository.findById(workspaceId)
 				.orElseThrow(() -> new NotFoundException("Workspace id " + workspaceId + " not found!"));
@@ -129,10 +152,10 @@ public class WorkspaceServiceImp implements WorkspaceService {
 			throw new ForbiddenException("You don't have permission to access this workspace!");
 		}
 		if (!userWorkspace.get().getIsAdmin()) {
-			throw new ForbiddenException("User is not allowed delete this workspace!");
+			throw new ForbiddenException("You are collaborator allowed to delete this workspace!");
 		}
 		try {
-			documentClient.deleteDocumentByWorkspaceId(workspaceId);
+			deleteDocumentByWorkspaceId(workspaceId);
 		} catch (FeignException.NotFound ignored) {
 		}
 		//delete workspace
@@ -156,7 +179,7 @@ public class WorkspaceServiceImp implements WorkspaceService {
 		List<UserWorkspace> userWorkspaces = userWorkspaceRepository.findByWorkspaceId(workspaceId);
 		List<UserResponse> userResponses = new ArrayList<>();
 		userWorkspaces.forEach(userWorkspace -> {
-			ApiResponse<UserResponse> userApiResponse = userClient.getUserById(userWorkspace.getUserId());
+			ApiResponse<UserResponse> userApiResponse = getUserById(userWorkspace.getUserId());
 			if (userApiResponse != null && userApiResponse.getPayload() != null) {
 				UserResponse userResponse = modelMapper.map(userApiResponse.getPayload(), UserResponse.class);
 				userResponse.setIsAdmin(userWorkspace.getIsAdmin());
@@ -175,7 +198,7 @@ public class WorkspaceServiceImp implements WorkspaceService {
 			throw new ForbiddenException("You don't have permission to access this workspace!");
 		}
 		if (!userWorkspace.get().getIsAdmin()) {
-			throw new ForbiddenException("User is not allowed update this workspace.");
+			throw new ForbiddenException("You are collaborator allowed to update this workspace!");
 		}
 		existElastic.setIsPrivate(isPrivate);
 		workspaceElasticRepository.save(existElastic);
