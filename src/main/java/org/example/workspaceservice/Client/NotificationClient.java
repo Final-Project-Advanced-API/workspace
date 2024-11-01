@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 
-@FeignClient(name = "notification-service",url = "http://localhost:8082",fallback = NotificationClientFallback.class)
+@FeignClient(name = "notification-service",url = "${notification-service.url}",fallback = NotificationClientFallback.class)
 @Primary
 public interface NotificationClient {
     @PostMapping("/api/v1/notifications")

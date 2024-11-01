@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 
 import java.util.UUID;
 
-@FeignClient(name = "document-service",url = "http://localhost:8085",fallback = DocumentClientFallback.class)
+@FeignClient(name = "document-service",url = "${document-service.url}",fallback = DocumentClientFallback.class)
 @Primary
 public interface DocumentClient {
     @DeleteMapping("/api/v1/documents/workspace/{workspaceId}")

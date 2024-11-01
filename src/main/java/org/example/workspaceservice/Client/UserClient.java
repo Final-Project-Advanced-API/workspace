@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import java.util.UUID;
 
-@FeignClient(name = "user-service",url = "http://localhost:8081",fallback = UserClientFallback.class)
+@FeignClient(name = "user-service",url = "${user-service.url}",fallback = UserClientFallback.class)
 @Primary
 public interface UserClient {
 

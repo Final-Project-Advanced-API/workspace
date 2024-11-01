@@ -3,12 +3,16 @@ spring:
     name: workspace-service
   # integrate with postgres
   datasource:
-    url: jdbc:postgresql://localhost:5432/stack_note
-    username: postgres
-    password: 2003
-  # spring data elastic
+      url: jdbc:postgresql://188.166.255.182:8084/workspace
+      username: workspace
+      password: 8084
+
   elasticsearch:
-    uris: http://localhost:9200
+    uris: http://209.38.56.20:9200
+    username: stacknote
+    password: stacknote
+    connection-timeout: 10s
+    socket-timeout: 30s
 
   #  #spring data jpa
   jpa:
@@ -53,7 +57,7 @@ resilience4j:
         minimum-number-of-calls: 5
         automatic-transition-from-open-to-half-open-enabled: true
         sliding-window-type: COUNT_BASED
-      NotificationClientsendNotificationToUser:
+      NotificationClientsendNotificationToUserStringNotificationRequest:
         register-health-indicator: true
         failure-rate-threshold: 50
         wait-duration-in-open-state: 10s
@@ -88,6 +92,15 @@ eureka:
       defaultZone: https://eureka.jelay.site/eureka/  # Adjust for your Eureka server URL
   instance:
     prefer-ip-address: true
+
+
+# feign client
+document-service:
+  url: https://document-service.jelay.site
+notification-service:
+  url: https://notificate-service.jelay.site
+user-service:
+  url: https://userservice.jelay.site
 
 ## Swagger configuration
 springdoc:

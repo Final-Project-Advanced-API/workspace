@@ -77,7 +77,7 @@ public class WorkspaceServiceImp implements WorkspaceService {
 		List<UserResponse> userResponses = new ArrayList<>();
 		WorkspaceElastic elastic = workspaceElasticRepository.save(modelMapper.map(ws, WorkspaceElastic.class));
 		ApiResponse<UserResponse> user = getUserById(UUID.fromString(getCurrentUser()));
-		if (user != null && user.getPayload() != null) {
+		if (user != null) {
 			UserResponse userResponse = user.getPayload();
 			userResponse.setIsAdmin(true);
 			userResponses.add(userResponse);
