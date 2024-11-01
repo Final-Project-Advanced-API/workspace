@@ -8,8 +8,9 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class NotificationClientFallback implements NotificationClient {
+
 	@Override
-	public ResponseEntity<?> sendNotificationToUser(NotificationRequest notificationRequest) {
+	public ResponseEntity<?> sendNotificationToUser(String authorization, NotificationRequest notificationRequest) {
 		return null;
 	}
 }

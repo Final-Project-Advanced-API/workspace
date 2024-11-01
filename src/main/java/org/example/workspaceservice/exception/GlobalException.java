@@ -1,5 +1,4 @@
 package org.example.workspaceservice.exception;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;

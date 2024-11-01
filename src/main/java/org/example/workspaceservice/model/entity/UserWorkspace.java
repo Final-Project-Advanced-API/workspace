@@ -17,5 +17,6 @@ public class UserWorkspace {
     private UUID userId;
     @Column(nullable = false)
     private UUID workspaceId;
+    @Column(nullable = false)
     private Boolean isAdmin;
 }

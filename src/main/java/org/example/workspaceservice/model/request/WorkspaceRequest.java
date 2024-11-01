@@ -1,5 +1,7 @@
 package org.example.workspaceservice.model.request;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -11,7 +13,12 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class WorkspaceRequest {
-    @NotBlank(message = "Workspace name must not be blank")
-    @Size(max = 100, message = "Workspace name must be less than 100 characters")
+    @NotBlank(message = "Workspace cannot be blank. Please provide a title.")
+    @NotNull(message = "Workspace cannot be null. A valid workspace is required.")
+    @Size(min = 2, max = 255, message = "Workspace length must be between 2 and 255 characters.")
+    @Pattern(
+            regexp = "^(?!\\s)(?!.*\\s{2}).*[A-Za-z0-9 ]*(?<!\\s)$",
+            message = "Workspace cannot start or end with a space, and it cannot contain consecutive spaces."
+    )
     private String workspaceName;
 }

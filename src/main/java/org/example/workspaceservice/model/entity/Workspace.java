@@ -15,7 +15,7 @@ public class Workspace {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID workspaceId;
-    @Column(nullable = false,length = 100)
+    @Column(nullable = false,length = 255)
     private String workspaceName;
     @Column(nullable = false)
     private Boolean isPrivate;
