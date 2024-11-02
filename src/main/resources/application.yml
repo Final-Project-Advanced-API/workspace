@@ -3,9 +3,9 @@ spring:
     name: workspace-service
   # integrate with postgres
   datasource:
-      url: jdbc:postgresql://188.166.255.182:8084/workspace
-      username: workspace
-      password: 8084
+    url: jdbc:postgresql://188.166.255.182:8084/workspace
+    username: workspace
+    password: 8084
 
   elasticsearch:
     uris: http://209.38.56.20:9200

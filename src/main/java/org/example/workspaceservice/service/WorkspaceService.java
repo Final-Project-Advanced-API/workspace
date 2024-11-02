@@ -12,5 +12,5 @@ public interface WorkspaceService {
     WorkspaceResponse updateWorkspace(UUID workspaceId,WorkspaceRequest workspaceRequest);
     Void deleteWorkspace(UUID workspaceId);
     WorkspaceResponse getWorkspace(UUID workspaceId);
-    Void updateStatusWorkspace(UUID workspaceId, Boolean isPrivate);
+    Void updateStatusWorkspace(UUID workspaceId);
 }

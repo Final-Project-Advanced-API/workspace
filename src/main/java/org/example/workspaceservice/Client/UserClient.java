@@ -13,7 +13,6 @@ import java.util.UUID;
 @FeignClient(name = "user-service",url = "${user-service.url}",fallback = UserClientFallback.class)
 @Primary
 public interface UserClient {
-
     @GetMapping("/api/v1/users/email")
     ApiResponse<UserResponse> getUserByEmail(@RequestHeader("Authorization") String authorization, @RequestParam String email);
 

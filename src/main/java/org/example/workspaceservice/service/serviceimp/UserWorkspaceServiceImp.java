@@ -9,12 +9,14 @@ import org.example.workspaceservice.exception.ForbiddenException;
 import org.example.workspaceservice.exception.NotFoundException;
 import org.example.workspaceservice.model.entity.UserWorkspace;
 import org.example.workspaceservice.model.entity.Workspace;
+import org.example.workspaceservice.model.entity.WorkspaceElastic;
 import org.example.workspaceservice.model.request.NotificationRequest;
 import org.example.workspaceservice.model.request.RemoveUserRequest;
 import org.example.workspaceservice.model.request.UserWorkspaceRequest;
 import org.example.workspaceservice.model.response.ApiResponse;
 import org.example.workspaceservice.model.response.UserResponse;
 import org.example.workspaceservice.repository.UserWorkspaceRepository;
+import org.example.workspaceservice.repository.WorkspaceElasticRepository;
 import org.example.workspaceservice.repository.WorkspaceRepository;
 import org.example.workspaceservice.service.UserWorkspaceService;
 import org.springframework.http.ResponseEntity;
@@ -22,7 +24,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -34,9 +35,10 @@ public class UserWorkspaceServiceImp implements UserWorkspaceService {
 	private final UserClient userClient;
 	private final NotificationClient notificationClient;
 	private final WorkspaceRepository workspaceRepository;
+	private final WorkspaceElasticRepository workspaceElasticRepository;
 
-	public String getCurrentUser() {
-		return SecurityContextHolder.getContext().getAuthentication().getName();
+	public UUID getCurrentUser() {
+		return UUID.fromString(SecurityContextHolder.getContext().getAuthentication().getName());
 	}
 
 	private String retrieveToken() {
@@ -68,64 +70,54 @@ public class UserWorkspaceServiceImp implements UserWorkspaceService {
 		if (user == null) {
 			throw new NotFoundException("User email not found!");
 		}
-		Workspace workspace = workspaceRepository.findById(userWorkspaceRequest.getWorkspaceId()).orElseThrow(() -> new NotFoundException("Workspace id " + userWorkspaceRequest.getWorkspaceId() + " not found!"));
-		Optional<UserWorkspace> admin = userWorkspaceRepository.findByUserIdAndWorkspaceId(UUID.fromString(getCurrentUser()), userWorkspaceRequest.getWorkspaceId());
-		if (admin.isEmpty()) {
-			throw new ForbiddenException("You don't have permission to access this workspace!");
+		WorkspaceElastic elastic = workspaceElasticRepository.findById(userWorkspaceRequest.getWorkspaceId()).orElseThrow(() -> new NotFoundException("Workspace "+userWorkspaceRequest.getWorkspaceId()+" not found!"));
+	    if (!elastic.getCreatedBy().equals(getCurrentUser())){
+			throw new ForbiddenException("You don't have permission to invite user into this workspace!");
 		}
-		if (!admin.get().getIsAdmin()) {
-			throw new ForbiddenException("Collaborator is not allowed invite member into this workspace!");
-		}
-		Optional<UserWorkspace> existUser = userWorkspaceRepository.findByUserIdAndWorkspaceId(UUID.fromString(user.getPayload().getUserId()), userWorkspaceRequest.getWorkspaceId());
+		Optional<UserWorkspace> existUser = userWorkspaceRepository.findByUserIdAndWorkspaceWorkspaceId(UUID.fromString(user.getPayload().getUserId()), userWorkspaceRequest.getWorkspaceId());
 		if (existUser.isPresent()) {
 			throw new ConflictException("User already exists join this workspace!");
 		}
-		ApiResponse<UserResponse> userSender = getUserById(UUID.fromString(getCurrentUser()));
-		NotificationRequest nr = new NotificationRequest();
-		nr.setMessage("STACK NOTES");
-		nr.setTitle(userSender.getPayload().getUsername() + " has added you to the \"" + workspace.getWorkspaceName() + "\" workspace on Stack Notes.");
-		nr.setSenderId(getCurrentUser());
-		nr.setReceiverId(user.getPayload().getUserId());
-		sendNotificationToUser(nr);
+		Workspace workspace = workspaceRepository.findById(userWorkspaceRequest.getWorkspaceId()).get();
+		ApiResponse<UserResponse> userSender = getUserById(getCurrentUser());
+		if(userSender != null){
+			NotificationRequest nr = new NotificationRequest();
+			nr.setMessage("STACK NOTES");
+			nr.setTitle(userSender.getPayload().getUsername() + " has added you to the \"" + elastic.getWorkspaceName() + "\" workspace on Stack Notes.");
+			nr.setSenderId(getCurrentUser().toString());
+			nr.setReceiverId(user.getPayload().getUserId());
+			sendNotificationToUser(nr);
+		}
 		UserWorkspace userWorkspace = new UserWorkspace();
 		userWorkspace.setUserId(UUID.fromString(user.getPayload().getUserId()));
-		userWorkspace.setWorkspaceId(userWorkspaceRequest.getWorkspaceId());
+		userWorkspace.setWorkspace(workspace);
 		userWorkspace.setIsAdmin(false);
 		userWorkspaceRepository.save(userWorkspace);
 		return null;
 	}
 
-	@Transactional
 	@Override
 	public Void removeCollaboratorFromWorkspace(RemoveUserRequest removeUserRequest) {
-		Optional<Workspace> workspace = workspaceRepository.findById(removeUserRequest.getWorkspaceId());
-		if (workspace.isEmpty()) {
-			throw new NotFoundException("Workspace id " + removeUserRequest.getWorkspaceId() + " not found!");
-		}
-		Optional<UserWorkspace> user = userWorkspaceRepository.findByUserIdAndWorkspaceId(
+		WorkspaceElastic elastic = workspaceElasticRepository.findById(removeUserRequest.getWorkspaceId()).orElseThrow(() -> new NotFoundException("Workspace "+removeUserRequest.getWorkspaceId()+" not found!"));
+		Optional<UserWorkspace> user = userWorkspaceRepository.findByUserIdAndWorkspaceWorkspaceId(
 				removeUserRequest.getUserId(), removeUserRequest.getWorkspaceId());
 		if (user.isEmpty()) {
 			throw new NotFoundException("User id " + removeUserRequest.getUserId() + " not found!");
 		}
-		Optional<UserWorkspace> userWorkspace = userWorkspaceRepository.findByUserIdAndWorkspaceId(
-				UUID.fromString(getCurrentUser()), removeUserRequest.getWorkspaceId());
-		if (userWorkspace.isEmpty()) {
-			throw new ForbiddenException("You don't have permission to access this workspace!");
+		if (!elastic.getCreatedBy().equals(getCurrentUser())) {
+			throw new ForbiddenException("You don't have permission to remove user from this workspace!");
 		}
-		if (!userWorkspace.get().getIsAdmin()) {
-			throw new ForbiddenException("User not allowed to remove collaborator from this workspace!");
+		if (elastic.getCreatedBy().equals(removeUserRequest.getUserId())) {
+			throw new ForbiddenException("You don't have permission to remove admin from this workspace!");
 		}
-		if (userWorkspace.get().getUserId().equals(removeUserRequest.getUserId())) {
-			throw new ForbiddenException("User not allowed to remove admin from this workspace!");
-		}
-		userWorkspaceRepository.deleteByUserIdAndWorkspaceId(removeUserRequest.getUserId(), removeUserRequest.getWorkspaceId());
+		userWorkspaceRepository.delete(user.get());
 		return null;
 	}
 
 
 	@Override
 	public UserWorkspace getUserByUserIdAndWorkspaceId(UUID userId, UUID workspaceId) {
-		Optional<UserWorkspace> userWorkspace = userWorkspaceRepository.findByUserIdAndWorkspaceId(userId, workspaceId);
+		Optional<UserWorkspace> userWorkspace = userWorkspaceRepository.findByUserIdAndWorkspaceWorkspaceId(userId, workspaceId);
 		if (userWorkspace.isEmpty()) {
 			throw new NotFoundException("User and workspace id not found!");
 		}
