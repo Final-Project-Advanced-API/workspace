@@ -211,8 +211,6 @@ This API allows you to manage workspaces, including creating, updating, and dele
 - **Description**: Updates the privacy status of a workspace (private or public). Only the admin of the workspace can change this setting.
 - **Path Parameters**:
     - `workspaceId` (required): UUID of the workspace.
-- **Query Parameters**:
-    - `isPrivate` (optional, default: `true`): Set to `true` to make the workspace private, or `false` to make it public.
 - **Response**:
 
     ```json
