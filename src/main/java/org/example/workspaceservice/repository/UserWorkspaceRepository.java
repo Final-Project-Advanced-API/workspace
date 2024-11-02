@@ -7,8 +7,6 @@ import java.util.Optional;
 import java.util.UUID;
 @Repository
 public interface UserWorkspaceRepository extends JpaRepository<UserWorkspace, UUID> {
-    List<UserWorkspace> findByWorkspaceId(UUID workspaceId);
-    void deleteByUserIdAndWorkspaceId(UUID userId, UUID workspaceId);
-    Optional<UserWorkspace> findByUserIdAndWorkspaceId(UUID userId, UUID workspaceId);
-    void deleteByWorkspaceId(UUID workspaceId);
+    List<UserWorkspace> findByWorkspaceWorkspaceId(UUID workspaceId);
+    Optional<UserWorkspace> findByUserIdAndWorkspaceWorkspaceId(UUID userId, UUID workspaceId);
 }

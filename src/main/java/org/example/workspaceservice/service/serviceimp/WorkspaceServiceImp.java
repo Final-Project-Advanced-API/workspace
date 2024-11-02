@@ -1,6 +1,5 @@
 package org.example.workspaceservice.service.serviceimp;
 
-import feign.FeignException;
 import lombok.AllArgsConstructor;
 import org.example.workspaceservice.Client.DocumentClient;
 import org.example.workspaceservice.Client.UserClient;
@@ -20,7 +19,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -35,8 +33,8 @@ public class WorkspaceServiceImp implements WorkspaceService {
 	private final DocumentClient documentClient;
 	private final UserClient userClient;
 
-	public String getCurrentUser() {
-		return SecurityContextHolder.getContext().getAuthentication().getName();
+	public UUID getCurrentUser() {
+		return UUID.fromString(SecurityContextHolder.getContext().getAuthentication().getName());
 	}
 
 	private String retrieveToken() {
@@ -61,22 +59,29 @@ public class WorkspaceServiceImp implements WorkspaceService {
 	@Override
 	public WorkspaceResponse createWorkspace(WorkspaceRequest workspaceRequest) {
 		// add to workspace
-		Workspace workspace = new Workspace();
-		workspace.setWorkspaceName(workspaceRequest.getWorkspaceName());
+		Workspace workspace = modelMapper.map(workspaceRequest, Workspace.class);
 		workspace.setIsPrivate(true);
 		workspace.setCreatedAt(LocalDateTime.now());
 		workspace.setUpdatedAt(LocalDateTime.now());
-		Workspace ws = workspaceRepository.save(workspace);
+		workspaceRepository.save(workspace);
 		// add to user-workspace
-		UserWorkspace userWorkspace = modelMapper.map(workspace, UserWorkspace.class);
-		userWorkspace.setUserId(UUID.fromString(getCurrentUser()));
+		UserWorkspace userWorkspace = new UserWorkspace();
+		userWorkspace.setWorkspace(workspace);
+		userWorkspace.setUserId(getCurrentUser());
 		userWorkspace.setIsAdmin(true);
 		userWorkspaceRepository.save(userWorkspace);
 		// add to elastic
 		WorkspaceResponse workspaceResponse = new WorkspaceResponse();
 		List<UserResponse> userResponses = new ArrayList<>();
-		WorkspaceElastic elastic = workspaceElasticRepository.save(modelMapper.map(ws, WorkspaceElastic.class));
-		ApiResponse<UserResponse> user = getUserById(UUID.fromString(getCurrentUser()));
+		WorkspaceElastic elastic = new WorkspaceElastic();
+		elastic.setWorkspaceId(workspace.getWorkspaceId());
+		elastic.setWorkspaceName(workspace.getWorkspaceName());
+		elastic.setIsPrivate(true);
+		elastic.setCreatedBy(getCurrentUser());
+		elastic.setCreatedAt(LocalDateTime.now());
+		elastic.setUpdatedAt(LocalDateTime.now());
+		workspaceElasticRepository.save(elastic);
+		ApiResponse<UserResponse> user = getUserById(getCurrentUser());
 		if (user != null) {
 			UserResponse userResponse = user.getPayload();
 			userResponse.setIsAdmin(true);
@@ -95,12 +100,10 @@ public class WorkspaceServiceImp implements WorkspaceService {
 		workspaceElasticsIterable.forEach(workspaceElastics::add);
 		List<WorkspaceResponse> workspaceResponses = new ArrayList<>();
 		workspaceElastics.forEach(workspace -> {
-			Optional<UserWorkspace> lstUserWorkspace = userWorkspaceRepository.findByUserIdAndWorkspaceId(
-					UUID.fromString(getCurrentUser()), workspace.getWorkspaceId()
-			);
+			Optional<UserWorkspace> lstUserWorkspace = userWorkspaceRepository.findByUserIdAndWorkspaceWorkspaceId(getCurrentUser(), workspace.getWorkspaceId());
 			if (lstUserWorkspace.isPresent()) {
 				WorkspaceResponse workspaceResponse = modelMapper.map(workspace, WorkspaceResponse.class);
-				List<UserWorkspace> userWorkspaces = userWorkspaceRepository.findByWorkspaceId(workspace.getWorkspaceId());
+				List<UserWorkspace> userWorkspaces = userWorkspaceRepository.findByWorkspaceWorkspaceId(workspace.getWorkspaceId());
 				List<UserResponse> userResponses = new ArrayList<>();
 				if (!userWorkspaces.isEmpty()) {
 					userWorkspaces.forEach(userWorkspace -> {
@@ -121,17 +124,11 @@ public class WorkspaceServiceImp implements WorkspaceService {
 
 	@Override
 	public WorkspaceResponse updateWorkspace(UUID workspaceId, WorkspaceRequest workspaceRequest) {
-		WorkspaceElastic workspaceElastic = workspaceElasticRepository.findById(workspaceId)
-				.orElseThrow(() -> new NotFoundException("Workspace id " + workspaceId + " not found!"));
-		Optional<UserWorkspace> userWorkspace = userWorkspaceRepository.findByUserIdAndWorkspaceId(UUID.fromString(getCurrentUser()), workspaceId);
-		if (userWorkspace.isEmpty()) {
-			throw new ForbiddenException("You don't have permission to access this workspace!");
+		WorkspaceElastic workspaceElastic = workspaceElasticRepository.findById(workspaceId).orElseThrow(() -> new NotFoundException("Workspace id " + workspaceId + " not found!"));
+		if (!workspaceElastic.getCreatedBy().equals(getCurrentUser())) {
+			throw new ForbiddenException("You don't have permission to update this workspace!");
 		}
-		if (!userWorkspace.get().getIsAdmin()) {
-			throw new ForbiddenException("You are collaborator allowed to update this workspace!");
-		}
-		Workspace workspace = workspaceRepository.findById(workspaceId)
-				.orElseThrow(() -> new NotFoundException("Workspace id " + workspaceId + " not found!"));
+		Workspace workspace = workspaceRepository.findById(workspaceId).orElseThrow(() -> new NotFoundException("Workspace id " + workspaceId + " not found!"));
 		modelMapper.map(workspaceRequest, workspace);
 		workspace.setUpdatedAt(LocalDateTime.now());
 		workspaceRepository.save(workspace);
@@ -142,27 +139,14 @@ public class WorkspaceServiceImp implements WorkspaceService {
 		return modelMapper.map(workspaceElastic, WorkspaceResponse.class);
 	}
 
-	@Transactional
 	@Override
 	public Void deleteWorkspace(UUID workspaceId) {
-		//find elastic
 		WorkspaceElastic workspaceElastic = workspaceElasticRepository.findById(workspaceId).orElseThrow(() -> new NotFoundException("Workspace id " + workspaceId + " not found"));
-		Optional<UserWorkspace> userWorkspace = userWorkspaceRepository.findByUserIdAndWorkspaceId(UUID.fromString(getCurrentUser()), workspaceId);
-		if (userWorkspace.isEmpty()) {
-			throw new ForbiddenException("You don't have permission to access this workspace!");
+		if (!workspaceElastic.getCreatedBy().equals(getCurrentUser())) {
+			throw new ForbiddenException("You don't have permission to delete this workspace!");
 		}
-		if (!userWorkspace.get().getIsAdmin()) {
-			throw new ForbiddenException("You are collaborator allowed to delete this workspace!");
-		}
-		try {
-			deleteDocumentByWorkspaceId(workspaceId);
-		} catch (FeignException.NotFound ignored) {
-		}
-		//delete workspace
 		workspaceRepository.deleteById(workspaceId);
-		//delete user-workspace
-		userWorkspaceRepository.deleteByWorkspaceId(workspaceId);
-		//delete elastic
+		deleteDocumentByWorkspaceId(workspaceId);
 		workspaceElasticRepository.delete(workspaceElastic);
 		return null;
 	}
@@ -170,13 +154,12 @@ public class WorkspaceServiceImp implements WorkspaceService {
 	@Override
 	public WorkspaceResponse getWorkspace(UUID workspaceId) {
 		WorkspaceElastic workspaceElastic = workspaceElasticRepository.findById(workspaceId).orElseThrow(() -> new NotFoundException("Workspace id " + workspaceId + " not found"));
-		Optional<UserWorkspace> lstUserWorkspace = userWorkspaceRepository.findByUserIdAndWorkspaceId(
-				UUID.fromString(getCurrentUser()), workspaceId);
+		Optional<UserWorkspace> lstUserWorkspace = userWorkspaceRepository.findByUserIdAndWorkspaceWorkspaceId(getCurrentUser(), workspaceId);
 		if (lstUserWorkspace.isEmpty()) {
 			throw new ForbiddenException("You don't have permission to access this workspace!");
 		}
 		WorkspaceResponse workspaceResponse = modelMapper.map(workspaceElastic, WorkspaceResponse.class);
-		List<UserWorkspace> userWorkspaces = userWorkspaceRepository.findByWorkspaceId(workspaceId);
+		List<UserWorkspace> userWorkspaces = userWorkspaceRepository.findByWorkspaceWorkspaceId(workspaceId);
 		List<UserResponse> userResponses = new ArrayList<>();
 		userWorkspaces.forEach(userWorkspace -> {
 			ApiResponse<UserResponse> userApiResponse = getUserById(userWorkspace.getUserId());
@@ -191,19 +174,20 @@ public class WorkspaceServiceImp implements WorkspaceService {
 	}
 
 	@Override
-	public Void updateStatusWorkspace(UUID workspaceId, Boolean isPrivate) {
+	public Void updateStatusWorkspace(UUID workspaceId) {
 		WorkspaceElastic existElastic = workspaceElasticRepository.findById(workspaceId).orElseThrow(() -> new NotFoundException("Workspace id " + workspaceId + " not found"));
-		Optional<UserWorkspace> userWorkspace = userWorkspaceRepository.findByUserIdAndWorkspaceId(UUID.fromString(getCurrentUser()), workspaceId);
-		if (userWorkspace.isEmpty()) {
-			throw new ForbiddenException("You don't have permission to access this workspace!");
+		if (!existElastic.getCreatedBy().equals(getCurrentUser())) {
+			throw new ForbiddenException("You don't have permission to update this workspace!");
 		}
-		if (!userWorkspace.get().getIsAdmin()) {
-			throw new ForbiddenException("You are collaborator allowed to update this workspace!");
-		}
-		existElastic.setIsPrivate(isPrivate);
-		workspaceElasticRepository.save(existElastic);
 		Workspace existWorkspace = workspaceRepository.findById(workspaceId).orElseThrow(() -> new NotFoundException("Workspace id " + workspaceId + " not found"));
-		existWorkspace.setIsPrivate(isPrivate);
+		if (Boolean.TRUE.equals(existElastic.getIsPrivate())) {
+			existElastic.setIsPrivate(false);
+			existWorkspace.setIsPrivate(false);
+		} else {
+			existElastic.setIsPrivate(true);
+			existWorkspace.setIsPrivate(true);
+		}
+		workspaceElasticRepository.save(existElastic);
 		workspaceRepository.save(existWorkspace);
 		return null;
 	}

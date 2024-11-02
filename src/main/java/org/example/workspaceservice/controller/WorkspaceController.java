@@ -90,10 +90,10 @@ public class WorkspaceController {
     }
     @PutMapping("/{workspaceId}/status")
     @Operation(summary = "change status private or public workspace")
-    public ResponseEntity<?> updateStatusWorkspace(@PathVariable @Valid UUID workspaceId,@RequestParam(defaultValue = "true") Boolean isPrivate) {
+    public ResponseEntity<?> updateStatusWorkspace(@PathVariable @Valid UUID workspaceId) {
         ApiResponse<?> response = ApiResponse.builder()
                 .message("Update status workspace successfully")
-                .payload(workspaceService.updateStatusWorkspace(workspaceId,isPrivate))
+                .payload(workspaceService.updateStatusWorkspace(workspaceId))
                 .status(HttpStatus.OK)
                 .statusCode(HttpStatus.OK.value())
                 .timestamp(LocalDateTime.now())
