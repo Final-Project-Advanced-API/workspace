@@ -1,10 +1,7 @@
 package org.example.workspaceservice.model.request;
 
 
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,10 +14,11 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserWorkspaceRequest {
-    @Email
-    @NotBlank
-    @Pattern(regexp = "^[A-Za-z0-9+_.-]+@gmail\\.com$",
-            message = "Email invalid! Ex: useremail@gamil.com")
-    private String email;
-    private UUID workspaceId;
+	@Email
+	@NotBlank
+	@NotNull
+	@NotEmpty
+	@Pattern(regexp = "^[\\w.%+-]+@[\\w.-]+\\.[a-zA-Z]{2,6}$", message = "Email must follow the format: user@domain.com")
+	private String email;
+	private UUID workspaceId;
 }
