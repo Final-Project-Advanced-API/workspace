@@ -28,11 +28,11 @@ public class UserWorkspaceController {
         ApiResponse<?> response = ApiResponse.builder()
                 .message("Invite collaborator into workspace successfully")
                 .payload(userWorkspaceService.inviteCollaboratorIntoWorkspace(userWorkspaceRequest))
-                .status(HttpStatus.OK)
-                .statusCode(HttpStatus.OK.value())
+                .status(HttpStatus.CREATED)
+                .statusCode(HttpStatus.CREATED.value())
                 .timestamp(LocalDateTime.now())
                 .build();
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
     @DeleteMapping

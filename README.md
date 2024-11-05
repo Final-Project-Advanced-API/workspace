@@ -247,7 +247,7 @@ This API allows you to manage workspaces, including creating, updating, and dele
     {
       "message": "Collaborator invited to workspace successfully",
       "status": "OK",
-      "statusCode": 200,
+      "statusCode": 201,
       "timestamp": "2024-11-01T14:57:00.2000401"
     }
     
